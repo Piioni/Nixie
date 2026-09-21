@@ -1,0 +1,121 @@
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-s": "workspace::Save"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-shift-c": "editor::Copy",
+      "ctrl-shift-v": "editor::Paste"
+    }
+  },
+  {
+    "context": "VimControl && (vim_mode == normal || vim_mode == visual) && !menu",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "space t": "terminal_panel::Toggle",
+      "space p": "project_panel::ToggleFocus",
+      "space e": "pane::RevealInProjectPanel",
+      "space g s": "git_panel::ToggleFocus",
+      "space u g": "project_panel::ToggleHideGitIgnore",
+      "space space": "file_finder::Toggle",
+      "space f p": "projects::OpenRecent",
+      "space s b": "buffer_search::Deploy",
+      "space /": "pane::DeploySearch",
+      "space q": "pane::CloseActiveItem",
+      "space m p": "markdown::OpenPreview",
+      "space m shift-p": "markdown::OpenPreviewToTheSide",
+      "space c a": "editor::ToggleCodeActions",
+      "space c r": "editor::Rename",
+      "g c": "editor::ToggleComments"
+    }
+  },
+  {
+    "context": "VimControl && vim_mode == normal && !menu",
+    "bindings": {
+      "ctrl-t": "workspace::NewTerminal",
+      "g d": "editor::GoToDefinition",
+      "g i": "editor::GoToImplementation",
+      "g t": "editor::GoToTypeDefinition",
+      "g r": "editor::FindAllReferences",
+      "] d": "editor::GoToDiagnostic",
+      "[ d": "editor::GoToPreviousDiagnostic",
+      "] h": "editor::GoToHunk",
+      "[ h": "editor::GoToPreviousHunk",
+      "shift-h": "pane::ActivatePreviousItem",
+      "shift-l": "pane::ActivateNextItem"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == insert && !menu",
+    "bindings": {
+      "j j": "vim::NormalBefore"
+    }
+  },
+  {
+    "context": "VimControl && !menu",
+    "bindings": {
+      "ctrl-g": null
+    }
+  },
+  {
+    "context": "EmptyPane && !menu",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "space space": "file_finder::Toggle",
+      "space p": "project_panel::ToggleFocus",
+      "space g s": "git_panel::ToggleFocus",
+      "space t": "terminal_panel::Toggle",
+      "space f p": "projects::OpenRecent",
+      "space /": "pane::DeploySearch"
+    }
+  },
+  {
+    "context": "Terminal && !menu",
+    "bindings": {
+      "ctrl-w": "pane::CloseActiveItem",
+      "ctrl-t": "workspace::NewTerminal",
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-l": "workspace::ActivatePaneRight"
+    }
+  },
+  {
+    "context": "ProjectPanel && not_editing && !menu",
+    "bindings": {
+      "a": "project_panel::NewFile",
+      "shift-a": "project_panel::NewDirectory",
+      "r": "project_panel::Rename",
+      "d": "project_panel::Delete",
+      "x": "project_panel::Cut",
+      "c": "project_panel::Copy",
+      "p": "project_panel::Paste",
+      "q": "project_panel::ToggleFocus",
+      "space space": "file_finder::Toggle",
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-l": "workspace::ActivatePaneRight"
+    }
+  },
+  {
+    "context": "GitPanel && !menu",
+    "bindings": {
+      "q": "git_panel::ToggleFocus",
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-l": "workspace::ActivatePaneRight"
+    }
+  }
+]

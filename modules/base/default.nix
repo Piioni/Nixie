@@ -1,11 +1,12 @@
 { ... }:
 {
   imports = [
-    ./networking.nix
+    ./fonts.nix
     ./locale.nix
+    ./networking.nix
     ./nix.nix
-    ./services.nix
     ./packages.nix
-    ./system.nix
+    ./ssh.nix
+    ./users.nix
   ];
 }

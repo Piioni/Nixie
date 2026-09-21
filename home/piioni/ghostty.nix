@@ -1,0 +1,25 @@
+{ pkgs, ... }:
+{
+  programs.ghostty = {
+    enable = true;
+    settings = {
+      theme = "Catppuccin Mocha";
+      background = "#1A1A27";
+      font-family = "Maple Mono NF";
+      font-size = 11;
+      command = "${pkgs.nushell}/bin/nu";
+      shell-integration = "detect";
+      mouse-scroll-multiplier = 1;
+      cursor-style = "block";
+      cursor-style-blink = false;
+      background-opacity = 1;
+      background-blur = false;
+      window-padding-x = 14;
+      window-padding-y = 14;
+      window-padding-balance = true;
+      window-decoration = true;
+      window-theme = "dark";
+      confirm-close-surface = false;
+    };
+  };
+}

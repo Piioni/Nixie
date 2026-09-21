@@ -1,0 +1,4 @@
+[gateway]
+always_on_discovery = false
+usage_collection = false
+scan_ports = []
