@@ -1,0 +1,197 @@
+# Host Composition Specification
+
+## Purpose
+
+Nixie composes one NixOS configuration per workstation from a shared `modules/` tree plus a small,
+explicit per-host directory. Per-machine facts — host identity, display topology, workspace-to-monitor
+map, touchpad presence, touchpad gestures, brightness key binds, and battery-UI toggles — are host
+data, never constants inside the layer applied to every machine.
+
+This capability exists because the flake previously evaluated *desktop system layer + laptop-derived
+Home Manager payload*: the machine named in `hosts/desktop/` was a real desktop, while every
+laptop-specific fact lived in the payload applied to all hosts, and no host could express "which
+machine am I".
+
+## Requirements
+
+### Requirement: Per-Host Composition
+
+The flake MUST declare each workstation as an explicit `hosts/<name>/` directory that composes the
+shared `modules/` tree, its own identity module, its own host-scoped fact module, and an optional
+`hardware-configuration.nix` import guarded by an existence check. `flake.nix` MUST declare one
+explicit `nixosSystem` block per host. The configuration MUST NOT introduce a shared host-inventory
+helper (for example `lib/mkWorkstation.nix`) or a `mkEnableOption`/`mkIf` enable-flag framework.
+
+#### Scenario: Both workstations evaluate from their own directory
+
+- GIVEN `hosts/desktop/` and `hosts/laptop/` each compose the shared `modules/` tree and declare their own identity
+- WHEN `nix flake show` runs over the changed tree
+- THEN it exits 0 and lists exactly `nixosConfigurations.desktop` and `nixosConfigurations.laptop`
+
+#### Scenario: No schema exists for an undefined machine
+
+- GIVEN no third workstation has been defined
+- WHEN the host directories and the host-data schema are inspected
+- THEN no host output, fact field, or composition branch exists for a third machine, and no hybrid-GPU, power-policy, or role axis is pre-built for it
+
+### Requirement: Host Identity And State Versions Are Host Data
+
+Each host MUST declare its own `networking.hostName` and system `stateVersion`, and MUST NOT inherit
+another host's identity. The Home Manager payload MUST keep the Home Manager `stateVersion` it has
+today (`"25.11"`), because changing it would change Home-Manager-generated targets and break the
+behaviour baseline.
+
+#### Scenario: Laptop identity is declared, not inherited
+
+- GIVEN `hosts/laptop/` identity module
+- WHEN the laptop host is evaluated
+- THEN `config.networking.hostName` is the laptop's declared name, `config.system.stateVersion` is `"25.11"`, and the payload's Home Manager `stateVersion` is `"25.11"`
+
+### Requirement: Host-Scoped Facts Are Data Consumed By Host-Agnostic Code
+
+Every per-machine fact MUST be declared as data in the host's own directory and consumed by shared,
+host-agnostic code. Shared consumers MUST NOT branch on a host name and MUST NOT contain
+machine-specific literals. Host data destined for the Home Manager layer MUST travel through the
+per-host Home Manager import path (or `home-manager.extraSpecialArgs` / `sharedModules`) and MUST NOT
+rely on `nixosSystem` `specialArgs`, which do not reach Home Manager modules. `modules/home-manager.nix`
+MUST NOT hardcode a single Home Manager import for all hosts.
+
+#### Scenario: Facts resolve per host without host-name branching
+
+- GIVEN both hosts declare different topology, workspace map, touchpad, brightness-bind, and battery-UI data
+- WHEN each host is evaluated
+- THEN each renders its own values and the shared consumers contain no host-name conditional
+
+#### Scenario: Home Manager transport does not cross the `specialArgs` boundary
+
+- GIVEN host data consumed by the Home Manager payload
+- WHEN the Home Manager modules are evaluated for either host
+- THEN the data arrives through the per-host import path and evaluation reports no undefined variable
+
+### Requirement: Cross-Host Payload Equivalence
+
+Both hosts MUST evaluate the same portable Home Manager payload. Per-host facts MUST change only the
+content attributed to them and MUST NOT add, remove, or rename any `home.file` target. The acceptance
+witness for this capability MUST be a sorted comparison of the `home.file` target set plus a
+per-target content comparison; a target count literal MUST NOT be used as a criterion. Because the
+pre-change evaluation was the migrated machine's own configuration, the regression witness MUST be
+*new host after* against *recorded pre-change evaluation*, and a desktop-against-desktop comparison
+MUST NOT be used as a regression witness.
+
+#### Scenario: The migrated-from machine reproduces the recorded pre-change payload
+
+- GIVEN the recorded pre-change `attrNames home-manager.users.piioni.home.file` and the recorded per-target contents for the pre-change `nixosConfigurations.desktop`
+- WHEN the laptop host is evaluated after the change
+- THEN the sorted laptop target set equals the recorded snapshot and each target's rendered content equals the recorded pre-change content
+
+#### Scenario: The desktop divergence is judged item by item
+
+- GIVEN the desktop host legitimately differs from its pre-change evaluation
+- WHEN the desktop diff is reviewed
+- THEN it is checked against the written per-item expectation of laptop-only facts absent, and no conclusion is drawn from "the desktop changed"
+
+### Requirement: Laptop-Only Facts Are Absent From The Desktop Host
+
+The desktop host MUST NOT apply any laptop-only fact. The facts that MUST be absent are the enumerated
+inventory: the internal-panel monitor definition, the internal-panel workspace pins, the touchpad
+block, the touchpad gestures, the brightness key binds, and the battery-UI toggles in the shell and
+system-monitor payloads. The desktop host MUST remain evaluable after losing them; this is a
+subtraction of facts about hardware it does not have, not a broken configuration.
+
+#### Scenario: Each enumerated fact is absent, checked individually
+
+- GIVEN the desktop host's rendered Home Manager payload
+- WHEN it is inspected against the written per-item expectation
+- THEN none of the enumerated facts is present, and any further drift is reported rather than absorbed into "expected difference"
+
+#### Scenario: The desktop host stays evaluable
+
+- GIVEN the desktop host no longer applies touchpad, gesture, brightness, battery, or internal-panel facts
+- WHEN the desktop host is evaluated through the project gate
+- THEN evaluation succeeds
+
+### Requirement: Un-captured Host Topology Is Explicit
+
+A host whose display topology has not been captured MUST represent it explicitly as an un-captured
+value, MUST surface an evaluation warning naming the gap, and MUST produce no monitor directives and
+no workspace-to-monitor pins for that host, so the compositor falls back to its own detection.
+Invented topology values MUST NOT be added, and an un-captured topology MUST NOT block evaluation.
+
+#### Scenario: The un-captured desktop host auto-detects
+
+- GIVEN the desktop host's topology is un-captured
+- WHEN the desktop host is evaluated and its rendered monitor payload is inspected
+- THEN evaluation emits a warning naming the un-captured topology and the rendered payload contains no monitor directive and no workspace pin
+
+#### Scenario: Values appear only when captured
+
+- GIVEN a host whose topology has been captured from the machine
+- WHEN that host is evaluated
+- THEN the rendered payload uses exactly the declared output names, modes, positions, scales, and workspace map
+
+### Requirement: Refactor Purity And Scope Boundary
+
+This change MUST NOT add behaviour; it moves facts to the correct host and introduces the seam. It MUST
+NOT add a package declaration, and it MUST NOT add power or battery configuration (`services.tlp`,
+`services.power-profiles-daemon`, `services.upower`), a session entry point
+(`services.displayManager.*`, `services.greetd`, `programs.hyprland`, `services.xserver.enable`), or
+any of the referenced-but-undeclared tools (`brightnessctl`, `cliphist`, `wl-paste`,
+`gnome-keyring-daemon`, `nautilus`, `helium`, `code`). It MUST NOT repair the `code` → `zed-editor`
+key-bind mismatch. `hosts/laptop/` MUST NOT ship a `hardware-configuration.nix`, and this capability
+MUST NOT claim the laptop is installable or activatable.
+
+The boundary has one reason: declaring those packages, or switching the bind, is a *behaviour
+addition*, and any behaviour addition breaks the byte-equality witness this refactor depends on. The
+relocated brightness binds therefore stay deliberately dead on every host, and that debt is recorded
+rather than hidden.
+
+#### Scenario: No behaviour was added
+
+- GIVEN the changed tree
+- WHEN package declarations and NixOS service declarations are inspected
+- THEN no new package declaration, no power or battery service, and no session entry point was introduced
+
+#### Scenario: The laptop is not declared installable
+
+- GIVEN `hosts/laptop/`
+- WHEN its files and the gate result are inspected
+- THEN it contains no `hardware-configuration.nix`, the gate reports evaluation only, and no installability or activation claim is made
+
+#### Scenario: Recorded debt stays recorded
+
+- GIVEN the laptop's rendered key binds
+- WHEN the brightness binds are inspected
+- THEN both binds are present and unchanged while no `brightnessctl` declaration exists, and the undeclared-tool list and the editor bind mismatch remain named follow-up items
+
+### Requirement: Verification Gate And Witness Discipline
+
+Verification MUST use the project's recorded evaluation gate: `system.build.toplevel.drvPath`
+evaluated per declared host through `extendModules` with the evaluation-only boot stub, over a
+non-Git copy of the working tree. `nix flake check` MUST NOT be used, because it forces the toplevel
+without the stub and dies on the pre-existing filesystem and boot-loader assertions. Derivation-path
+equality MUST be claimed only for a pure move; when evaluated content legitimately changes, the
+witness MUST degrade to the target-set snapshot plus a rendered-content diff.
+
+#### Scenario: Every declared host passes the gate
+
+- GIVEN a non-Git copy of the working tree that contains the change's new files
+- WHEN the recorded gate command runs once per declared host
+- THEN each host evaluates to a derivation path and the command exits 0
+
+#### Scenario: `nix flake check` is excluded
+
+- GIVEN `hosts/desktop/hardware-configuration.nix` is intentionally absent
+- WHEN verification is selected
+- THEN `nix flake check` is not invoked and the `extendModules` gate is used instead
+
+#### Scenario: The gate's permissiveness is a recorded limitation
+
+- GIVEN the gate stub supplies `nixpkgs.config.allowUnfree = true`, which the tracked tree does not
+- WHEN verification results are reported
+- THEN the gate is reported as more permissive than a real build and the difference is left unfixed in this change
+
+#### Scenario: Formatting gate
+
+- GIVEN the changed tree
+- WHEN `nix run .#formatter.x86_64-linux -- --check $(git ls-files '*.nix')` runs
+- THEN it exits 0
