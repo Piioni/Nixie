@@ -12,3 +12,6 @@ core*
 
 first_steps.md
 references/
+
+# Local Pi runtime state
+.atl/
