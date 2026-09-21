@@ -7,6 +7,8 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.piioni = import ../home/piioni;
+    # The Home Manager user is declared per host, in that host's own home.nix,
+    # so the user layer travels through a per-host import path instead of being
+    # decided once by the shared system layer.
   };
 }

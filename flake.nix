@@ -23,6 +23,14 @@
         modules = [ ./hosts/desktop/default.nix ];
       };
 
+      nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          homeManager = inputs.home-manager;
+        };
+        modules = [ ./hosts/laptop/default.nix ];
+      };
+
       formatter.${system} = pkgs.nixfmt;
 
       devShells.${system}.default = pkgs.mkShell {
