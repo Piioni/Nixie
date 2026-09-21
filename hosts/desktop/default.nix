@@ -3,7 +3,7 @@
   imports = [
     ../../modules
     ./host.nix
-    ./gpu-nvidia.nix
+    ../../modules/hardware/nvidia.nix
   ]
   ++ lib.optional (builtins.pathExists ./hardware-configuration.nix) ./hardware-configuration.nix;
 }
