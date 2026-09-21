@@ -12,10 +12,11 @@
 - `hosts/desktop/default.nix`: host composition and optional hardware import.
 - `hosts/desktop/host.nix`: host identity and user declaration.
 - `hosts/desktop/gpu-nvidia.nix`: Nvidia-specific options.
-- `modules/nixos/default.nix`: aggregate import list for root modules.
-- `modules/nixos/*.nix`: focused modules (`networking`, `locale`, `nix`, `services`, `packages`,
-  `system`).
-- `first_steps.md`: learning checklist with practical validation commands.
+- `modules/default.nix`: root module entrypoint; imports the desktop composition.
+- `modules/desktop.nix`: composes the shared base layer with the desktop layer.
+- `modules/base/default.nix`: aggregate imports for shared system modules (`fonts`, `locale`,
+  `networking`, `nix`, `packages`, `ssh`, and `users`).
+- `modules/desktop/default.nix`: aggregate imports for desktop-only modules (`audio` and `fonts`).
 - `references/peachy-nixos/`: script-driven advanced example.
 - `references/ryan-nixos/`: highly modular example with `Justfile` and CI workflow.
 
@@ -65,7 +66,10 @@ sudo nixos-rebuild switch --flake .#desktop
 
 ### Imports and composition
 
-- Keep shared imports in `modules/nixos/default.nix`.
+- Keep the root module entrypoint in `modules/default.nix`.
+- Compose the base and desktop layers in `modules/desktop.nix`.
+- Keep shared imports in `modules/base/default.nix` and desktop-only imports in
+  `modules/desktop/default.nix`.
 - Compose host-specific config in `hosts/desktop/default.nix`.
 - Follow existing optional hardware import pattern:
 
@@ -85,7 +89,7 @@ sudo nixos-rebuild switch --flake .#desktop
 
 - Use kebab-case for file names (`gpu-nvidia.nix`).
 - Keep host names lowercase (`desktop`).
-- Keep directories descriptive (`hosts/desktop`, `modules/nixos`).
+- Keep directories descriptive (`hosts/desktop`, `modules/base`, `modules/desktop`).
 - Use upstream NixOS option names exactly (`networking.hostName`, `services.openssh.enable`).
 
 ### Types and values
@@ -148,7 +152,7 @@ environment.systemPackages = with pkgs; [
 ## Quick Checklist for Agents
 
 ```text
-1) Inspect flake.nix, hosts/desktop, and modules/nixos.
+1) Inspect flake.nix, hosts/desktop, modules/base, and modules/desktop.
 2) Make minimal, local edits in one host/module area.
 3) Format touched files (nixfmt and/or prettier where relevant).
 4) Run flake show, then rebuild build/test for .#desktop.
