@@ -1,29 +1,35 @@
 {
-  description = "Mi primer NixOS";
+  description = "NixOS configuration for my machines";
 
-    inputs = {
-      # Official NixOS package source, using nixos's unstable branch by default
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-      nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-      # Home Manager, for managing user-level configuration
-      home-manager = {
-        url = "github:nix-community/home-manager/master";
-        # url = "github:nix-community/home-manager/release-25.11";
+  inputs.home-manager = {
+    url = "github:nix-community/home-manager/master";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
 
-        # The `follows` keyword in inputs is used for inheritance.
-        # Here, `inputs.nixpkgs` of home-manager is kept consistent with the `inputs.nixpkgs` of the current flake,
-        # to avoid problems caused by different versions of nixpkgs dependencies.
-        inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-
-    };
-
-    outputs = { nixpkgs, ... }: {
-        nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
-            system = "x86_64-linux";
-            modules = [ ./hosts/desktop/default.nix ];
+  outputs =
+    { nixpkgs, ... }@inputs:
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+    in
+    {
+      nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          homeManager = inputs.home-manager;
         };
+        modules = [ ./hosts/desktop/default.nix ];
+      };
+
+      formatter.${system} = pkgs.nixfmt;
+
+      devShells.${system}.default = pkgs.mkShell {
+        packages = [
+          pkgs.nixd
+          pkgs.nixfmt
+        ];
+      };
     };
 }
