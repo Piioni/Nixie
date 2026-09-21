@@ -107,6 +107,21 @@ Independent read-only verification passed all eight criteria.
 - Because the whole `home/` tree is untracked in Git, "nothing outside `home/piioni/` changed" rests on mtime evidence rather than a git diff.
 - Delegation fallback: the first writer launch failed with `Codex error: The usage limit has been reached` on `openai-codex/gpt-5.6-terra` after one turn and zero tool calls. The batch was completed through a writer and a verifier re-pointed to `deepseek/deepseek-flash` in `~/.pi/agent/subagents.json`.
 
+### Commit evidence
+
+Work-unit commits on `main`, in order. Each intermediate tree still evaluates: the old `modules/nixos` layer remains intact until the module restructure lands.
+
+| Commit | Purpose |
+| --- | --- |
+| `6993c12` | `feat(flake): pin nixpkgs and wire the home-manager input` |
+| `2baa6cd` | `feat(system): manage the piioni user environment declaratively` |
+| `9f776ee` | `chore(repo): ignore local Pi runtime state` |
+| `b6a69c7` | `chore(tooling): exclude the Zed JSONC artifact from project diagnostics` |
+| `38f1ab0` | `docs(agents): document the Nixie layout, build commands and workflow` |
+| `c4dee6a` | `docs(odd): track the desktop dotfiles migration` |
+
+Post-commit checks: `6993c12` still carries all seven `modules/nixos` files and no `home/` tree; `2baa6cd` carries zero `modules/nixos` files and 98 `home/` files; the working tree is clean and the committed tree evaluates to 50 Home Manager targets.
+
 ## Later decisions
 
 - Kitty must not launch Fish; it uses the declarative Nushell path.
