@@ -11,7 +11,7 @@ Keep the direct `flake.nix -> hosts/<name>/default.nix` wiring. Each host's `def
 ## Work units
 
 - [x] 1. Extract per-host hardware composition into `hosts/<name>/hardware.nix`.
-- [ ] 2. Review and extract concrete host-specific networking configuration, if any.
+- [x] 2. Review and extract concrete host-specific networking configuration, if any.
 - [ ] 3. Review and extract concrete host-specific services or power configuration, if any.
 - [ ] 4. Verify each module transition and commit each meaningful work unit.
 
@@ -34,6 +34,14 @@ Keep the direct `flake.nix -> hosts/<name>/default.nix` wiring. Each host's `def
 - Passed targeted graph evaluation: `nix eval --impure --json path:.#nixosConfigurations.laptop.config.system.stateVersion` returned `"25.11"`.
 - Full-toplevel evaluation remains blocked for both hosts by the existing checkout hardware condition: `nix eval --impure --raw path:.#nixosConfigurations.<host>.config.system.build.toplevel.drvPath` reports no root `fileSystems` entry and no GRUB device configuration. Neither `hosts/<name>/hardware-configuration.nix` is present, and the optional guards leave those settings unset.
 - `nix eval --raw .#nixosConfigurations.desktop.config.system.build.toplevel.drvPath` also cannot see the new untracked module through the Git flake source. It was not staged by design; `path:.` was used for the subsequent evaluations.
+
+## Work unit 2 review
+
+- [x] No host-specific networking module was added because the current networking configuration is shared.
+
+The shared `modules/base/networking.nix` owns NetworkManager and the firewall. Host-specific identity remains in each
+host's `host.nix` through `networking.hostName`; there are no current per-host interfaces, addresses, routes, or DNS
+settings to extract. A future networking module should be added only when those settings become host-specific.
 
 ## Boundaries
 
