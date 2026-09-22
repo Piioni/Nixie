@@ -13,7 +13,7 @@ Keep the direct `flake.nix -> hosts/<name>/default.nix` wiring. Each host's `def
 - [x] 1. Extract per-host hardware composition into `hosts/<name>/hardware.nix`.
 - [x] 2. Review and extract concrete host-specific networking configuration, if any.
 - [ ] 3. Review and extract concrete host-specific services or power configuration, if any.
-- [ ] 4. Verify each module transition and commit each meaningful work unit.
+- [x] 4. Verify each module transition and commit each meaningful work unit.
 
 ## Work unit 1: hardware composition
 
@@ -55,6 +55,16 @@ settings to extract. A future networking module should be added only when those 
 - Passed targeted graph evaluation: `nix eval --impure --json path:.#nixosConfigurations.desktop.config.programs.steam.enable` returned `true`.
 - Passed targeted graph evaluation: `nix eval --impure --json path:.#nixosConfigurations.desktop.config.programs.gamemode.enable` returned `true`.
 - Passed laptop import boundary check: `if grep -Fq './gaming.nix' hosts/laptop/default.nix; then echo 'laptop imports gaming.nix'; exit 1; else echo 'laptop does not import gaming.nix'; fi` returned `laptop does not import gaming.nix`.
+
+## Final verification for the current batch
+
+- Passed: `nix flake show` lists `desktop` and `laptop`.
+- Passed: formatter checks for the changed host modules and `git diff --check`.
+- Passed targeted evaluation: desktop graphics, Steam, and GameMode are enabled; laptop state version is `25.11`.
+- Passed import boundary: desktop owns NVIDIA and gaming; laptop does not import the desktop gaming module.
+- Tracked worktree is clean after commits `1a4ab8f`, `d267646`, and `dda4716`.
+- Full production toplevel remains blocked by the pre-existing missing root filesystem and GRUB-device assertions;
+  the stubbed targeted evaluation succeeds apart from the known Yazi warning.
 
 ## Boundaries
 
