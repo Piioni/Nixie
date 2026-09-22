@@ -54,7 +54,10 @@ host-agnostic code. Shared consumers MUST NOT branch on a host name and MUST NOT
 machine-specific literals. Host data destined for the Home Manager layer MUST travel through the
 per-host Home Manager import path (or `home-manager.extraSpecialArgs` / `sharedModules`) and MUST NOT
 rely on `nixosSystem` `specialArgs`, which do not reach Home Manager modules. `modules/home-manager.nix`
-MUST NOT hardcode a single Home Manager import for all hosts.
+MUST NOT hardcode a single Home Manager import for all hosts. Direct repository dotfiles may use the
+live checkout path through explicit out-of-store symlinks, but fact-dependent and substituted targets
+remain generated/store-backed; this ownership boundary is specified by home-payload WU3b, while WU4
+changes host facts only.
 
 #### Scenario: Facts resolve per host without host-name branching
 

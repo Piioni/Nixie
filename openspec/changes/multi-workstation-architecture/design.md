@@ -315,16 +315,26 @@ the host file, and the split buys nothing structurally.
 
 ## 6. `hypr.nix`: eleven explicit targets and the ownership proof
 
-### 6.1 Before / after
+### 6.1 Live-dotfile boundary and WU3b transition
 
-| | Before | After |
+| Target | Current authorized ownership | WU3b ownership |
 |---|---|---|
-| `hypr/hyprland.lua` | `.source` | unchanged (`.source`) |
-| `hypr/lua/*.lua` | **one** entry: `recursive = true` copy of the directory | **eleven** entries: 6 verbatim `.source` (`animations`, `autostart`, `decorations`, `programs`, `settings`, `windowrules`) + 5 rendered `.text` (`monitors`, `workspaces`, `inputs`, `gestures`, `keybinds`) |
-| `hypr/scripts/*` | one entry: `recursive = true` | unchanged |
+| `hypr/hyprland.lua` | direct out-of-store symlink | direct out-of-store symlink |
+| `hypr/scripts/*` | one explicit direct out-of-store symlink per script | one explicit direct out-of-store symlink per script |
+| `hypr/lua` | one `recursive = true` store-backed directory owner | **deleted before leaf declarations** |
+| `hypr/lua/{animations,autostart,decorations,programs,settings,windowrules}.lua` | covered only by the recursive owner | six explicit direct out-of-store symlink leaf targets |
+| `hypr/lua/{monitors,workspaces,inputs,gestures,keybinds}.lua` | covered only by the recursive owner | five rendered/store-backed `.text` leaf targets |
 
-The recursive copy of `hypr/lua` is **deleted, not shadowed**, and no other module declares anything under
-`hypr/` (verified: `hypr.nix` is the sole owner of `hypr/**`).
+Direct repository-owned payloads use
+`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/..."`.
+The current recursive `hypr/lua` owner is deliberately retained as the only safe intermediate state: no
+leaf may be added beneath it. WU3b's atomic ownership transition first removes that recursive entry, then
+introduces all eleven explicit leaves and retains the prefix assertion below. `hypr/hyprland.lua` and the
+script leaves are safe to convert now because they have no generated child target. Outside Hyprland,
+`caelestia/cli.json` and the btop theme leaves are direct out-of-store symlinks; `caelestia/shell.json`
+remains rendered for its runtime-path substitution and later battery divergence, while `btop/btop.conf`
+remains store-backed until WU3b renders its later battery divergence. No other module declares anything
+under `hypr/` (verified: `hypr.nix` is the sole owner of `hypr/**`).
 
 ### 6.2 Why "shadowed" would be silently wrong
 
@@ -659,7 +669,7 @@ nix run .#formatter.x86_64-linux -- --check $(git ls-files '*.nix')   # plus any
 | **WU1** NVIDIA pure move | `modules/hardware/nvidia.nix` (new, 38) ← `hosts/desktop/gpu-nvidia.nix` (deleted), `hosts/desktop/default.nix` (1 line) | ≈5 with `git -M`, ≈78 raw (no rename detection) | Gate for **desktop** | **R4**: `drvPath` identical |
 | **WU2** host seam + laptop host, payload still verbatim | new `hosts/laptop/{default,host,home}.nix`, new `hosts/desktop/home.nix`, `hosts/desktop/default.nix` (+1), `flake.nix` (+9), `modules/home-manager.nix` (−1/+1) | ≈56 | Gate for **both hosts** | **R1–R3 + R7**: laptop-after ≡ desktop-before; flake lists two hosts |
 | **WU3a** plumbing: schema + roles + facts declared | new `home/piioni/{workstation,base,gui}.nix` + `hosts/{laptop,desktop}/facts.nix`; rewritten `home/piioni/default.nix`; `hosts/*/home.nix` (+3 each) | ≈110 | Gate for **both hosts** | **R1–R3**: facts declared but consumed by nothing, so the payload is still byte-identical |
-| **WU3b** render the seven files | `home/piioni/hypr.nix` (rewrite), `caelestia.nix`, `btop.nix` | ≈125 | Gate for **both hosts** | **R1–R3**, and R6 for the laptop (no warning); desktop still runs on the laptop-mirrored facts |
+| **WU3b** hybrid ownership + render the seven files | `home/piioni/hypr.nix` (ownership transition + render), `caelestia.nix`, `btop.nix` | ≈125 | Gate for **both hosts** | **W1–W3**, one-owner/prefix assertion, and no laptop topology warning; desktop still runs on laptop-mirrored facts |
 | **WU4** desktop divergence | `hosts/desktop/facts.nix` (4 values) | ≈8 | Gate for **both hosts** | **R5 + R6**: per-item absence and the topology warning |
 
 **Budget accounting (honest).** Total ≈ 300 changed lines with rename detection, ≈ 375 without — inside the

@@ -9,12 +9,34 @@ on the machine the payload was migrated from stays byte-identical to the migrate
 
 ## Requirements
 
+### Requirement: Live-Dotfile Hybrid Ownership Boundary
+
+Direct repository-owned payload files MUST use explicit
+`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/..."` paths.
+`hypr/hyprland.lua`, every `hypr/scripts/*` leaf, `caelestia/cli.json`, and btop theme leaves are direct
+ownership. Host-dependent or substituted targets remain generated/store-backed: the five fact-dependent
+Hyprland Lua regions, `caelestia/shell.json` (runtime-path substitution and later battery divergence), and
+`btop/btop.conf` (later battery divergence). This boundary does not alter the authorized witness amendment.
+
+#### Scenario: Recursive Hyprland ownership transitions without overlap
+
+- GIVEN `hypr/lua` is currently owned as one recursive directory
+- WHEN WU3b introduces direct and rendered Lua leaves
+- THEN it removes the recursive owner before adding any leaf, preserves the one-owner/prefix assertion,
+  and gives six host-independent leaves direct ownership while the five fact-dependent leaves remain rendered
+
+#### Scenario: WU4 owns divergence rather than direct-file conversion
+
+- GIVEN the hybrid boundary is established in WU3b
+- WHEN desktop-specific values diverge
+- THEN WU4 changes only host facts and does not change ownership of direct payload targets
+
 ### Requirement: Home Manager Target Set Stability
 
 The payload MUST expose the same `home.file` target names for every host before and after host-scoping.
 A directory-recursive `xdg.configFile` copy MUST NOT coexist with a per-file target for the same path:
-where a file inside a recursively copied directory becomes a rendered per-file target, the recursive
-copy MUST be replaced by explicit per-file entries producing identical target names.
+where a file inside a recursively copied directory becomes a rendered or direct per-file target, the recursive
+copy MUST be removed before explicit per-file entries are introduced, producing identical target names.
 
 #### Scenario: Target names survive replacing the recursive copy
 

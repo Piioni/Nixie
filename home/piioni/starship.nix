@@ -1,10 +1,12 @@
-{ ... }:
+{ config, ... }:
 {
   programs.starship = {
     enable = true;
     enableBashIntegration = false;
     enableFishIntegration = false;
     enableNushellIntegration = true;
-    settings = builtins.fromTOML (builtins.readFile ./starship.toml);
   };
+
+  xdg.configFile."starship.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/starship.toml";
 }

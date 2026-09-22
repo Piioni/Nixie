@@ -223,12 +223,22 @@ reviewer seeing laptop values in the desktop host file before WU4 is seeing the 
 
 ---
 
-## WU3b — Render the seven host-scoped payload files
+## WU3b — Hybrid ownership and seven host-scoped rendered files
 
-**Files:** `home/piioni/hypr.nix` (rewrite), `home/piioni/caelestia.nix`, `home/piioni/btop.nix`.
+**Files:** `home/piioni/hypr.nix` (atomic Lua ownership transition + rendering),
+`home/piioni/caelestia.nix`, `home/piioni/btop.nix`.
 **Depends on:** WU3a (schema and facts must exist).
-**Gate:** G1 for both hosts exit 0; G2 per-file R1 byte equality for the laptop (all seven files);
-G3 R2/R3; R6 negative for the laptop (no un-captured-topology warning); G5.
+**Live-dotfile boundary:** direct repository payloads use explicit
+`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/..."` paths.
+`hypr/hyprland.lua`, each `hypr/scripts/*` leaf, `caelestia/cli.json`, and btop themes may already use
+that ownership. `hypr/lua` remains recursively store-backed until this unit; WU3b must delete that owner
+before declaring any leaf. Its six host-independent Lua leaves become direct symlinks, while its five
+fact-dependent leaves remain rendered/store-backed. `caelestia/shell.json` stays rendered for runtime path
+substitution and later battery divergence; `btop/btop.conf` stays rendered/store-backed for later battery
+divergence. This is the one-owner/prefix-preserving hybrid boundary.
+**Gate:** G1 for both hosts exit 0; W2 per-file byte equality for the laptop (all seven files); W1 target
+set equality, the prefix assertion, no laptop topology warning, and G5. Retain the authorized witness
+amendment; do not claim unrun payload verification.
 **Rollback boundary:** restore the `"hypr/lua"` recursive `xdg.configFile` entry, revert the three
 consumer modules, and delete the two generators — `monitors.lua`, `workspaces.lua`,
 `inputs.lua`, `gestures.lua`, `keybinds.lua`, `caelestia/shell.json` and `btop/btop.conf` are untouched
@@ -236,7 +246,7 @@ on disk, so the raw payload restores itself.
 **Commit boundary:** its own commit, after WU3a. Measure `git diff --stat -M` here (see the mid-apply
 size checkpoint).
 
-- [ ] Rewrite `home/piioni/hypr.nix`: delete the `"hypr/lua"` `recursive = true` copy and add exactly eleven explicit targets — six verbatim `.source` (`animations`, `autostart`, `decorations`, `programs`, `settings`, `windowrules`) and five `.text` (`monitors`, `workspaces`, `inputs`, `gestures`, `keybinds`); leave `hypr/hyprland.lua` and the `hypr/scripts` recursive copy unchanged. <!-- sdd-owner: implementation -->
+- [ ] Rewrite `home/piioni/hypr.nix` atomically: delete the `"hypr/lua"` `recursive = true` owner before adding exactly eleven explicit leaves — six direct out-of-store `.source` leaves (`animations`, `autostart`, `decorations`, `programs`, `settings`, `windowrules`) and five rendered `.text` leaves (`monitors`, `workspaces`, `inputs`, `gestures`, `keybinds`). Retain explicit direct ownership for `hypr/hyprland.lua` and every `hypr/scripts/*` leaf; do not restore a recursive script owner. <!-- sdd-owner: implementation -->
 - [ ] Add the single-owner prefix assertion to `hypr.nix`: no raw `home.file` target may be a path-prefix of another. <!-- sdd-owner: implementation -->
 - [ ] Implement the `monitors.lua` value generator: one `hl.monitor` block per `display.outputs` entry in declared order, blank-line separation, single trailing newline, `scale` emitted verbatim as the raw Lua literal. <!-- sdd-owner: implementation -->
 - [ ] Implement the `workspaces.lua` value generator: one local binding per pin group, **two distinct branches** selected by the `guard` enum (`monitor-exists` → `if hl.get_monitor(...) ~= nil then … end`; `unconditional` → bare loop), declaration order preserved, `special:magic` always emitted, and **zero locals / zero pins** when `display = null`. <!-- sdd-owner: implementation -->
@@ -244,8 +254,8 @@ size checkpoint).
 - [ ] Generate `hypr/lua/inputs.lua` from the payload file with the touchpad region (lines 17–24, copied from the pre-change file at implementation time) dropped when `touchpad = false`; keep keyboard and mouse settings byte-verbatim. <!-- sdd-owner: implementation -->
 - [ ] Generate `hypr/lua/gestures.lua` from the payload file, reduced to one comment line when `touchpad = false`; the target must stay a loadable Lua chunk because `hyprland.lua` requires it unconditionally. <!-- sdd-owner: implementation -->
 - [ ] Generate `hypr/lua/keybinds.lua` from the payload file with the stale comment and both `XF86MonBrightness*` binds (lines 84–90 region) replaced when `brightnessKeys = false`. <!-- sdd-owner: implementation -->
-- [ ] Convert `home/piioni/btop.nix`'s `btop/btop.conf` target from `.source` to `.text` using the checked splice, flipping `show_battery = true` to `false` (line 243 region) and keeping every other key byte-verbatim. <!-- sdd-owner: implementation -->
-- [ ] Extend the existing `lib.replaceStrings` call in `home/piioni/caelestia.nix` with the additive `"showBattery": true` → `false` substitution for `caelestia/shell.json`; do not restructure the file and do not add the splice helper a third time. <!-- sdd-owner: implementation -->
+- [ ] Keep btop theme leaves as direct out-of-store symlinks and convert only `home/piioni/btop.nix`'s store-backed `btop/btop.conf` target from `.source` to `.text` using the checked splice, flipping `show_battery = true` to `false` (line 243 region) and keeping every other key byte-verbatim. <!-- sdd-owner: implementation -->
+- [ ] Keep `caelestia/cli.json` as a direct out-of-store symlink and extend the existing `lib.replaceStrings` call for store-backed `caelestia/shell.json` with the additive `"showBattery": true` → `false` substitution; do not restructure the file and do not add the splice helper a third time. <!-- sdd-owner: implementation -->
 - [ ] Verify R1 per file: for the laptop, the materialised `hypr/lua/monitors.lua`, `hypr/lua/workspaces.lua`, `hypr/lua/inputs.lua`, `hypr/lua/gestures.lua`, `hypr/lua/keybinds.lua`, `caelestia/shell.json`, and `btop/btop.conf` are each byte-identical to the WU0 oracle (compare rendered content, not the `.source`/`.text` mechanism). <!-- sdd-owner: implementation -->
 - [ ] Verify R2/R3: the option snapshot shows exactly one raw key removed (`…/hypr/lua`) and exactly eleven added (`…/hypr/lua/<name>.lua`) and nothing else; no target is a path-prefix of another; the eleven `require("lua.*")` targets resolve for both hosts. <!-- sdd-owner: implementation -->
 - [ ] Run G1 for both hosts (exit 0); confirm the laptop emits **no** un-captured-topology warning, while `desktop` still renders the laptop-mirrored facts at this unit. <!-- sdd-owner: implementation -->
