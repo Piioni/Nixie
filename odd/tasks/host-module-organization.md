@@ -52,7 +52,8 @@ settings to extract. A future networking module should be added only when those 
 
 - [x] Add `hosts/laptop/power.nix` with `services.power-profiles-daemon.enable = true` for laptop only.
 - [x] Keep the desktop composition free of the laptop power module.
-- [x] Leave lid and suspend policy intentionally undecided.
+- [x] Suspend when the lid closes on battery power; ignore lid closure on external power.
+- [x] Leave idle suspension policy intentionally undecided.
 
 ### Validation performed
 
