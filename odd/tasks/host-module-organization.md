@@ -43,6 +43,19 @@ The shared `modules/base/networking.nix` owns NetworkManager and the firewall. H
 host's `host.nix` through `networking.hostName`; there are no current per-host interfaces, addresses, routes, or DNS
 settings to extract. A future networking module should be added only when those settings become host-specific.
 
+## Work unit 3: desktop gaming module
+
+- [x] Add `hosts/desktop/gaming.nix` with Steam and GameMode enabled for desktop only.
+- [ ] Review and extract any other concrete host-specific services or power configuration, if needed.
+
+### Validation performed
+
+- Passed: `git diff --check`.
+- Passed (exit 0; emitted `warning: Git tree '/home/piioni/Repos/Nixie' is dirty`): `nix fmt -- --check hosts/desktop/default.nix hosts/desktop/gaming.nix`.
+- Passed targeted graph evaluation: `nix eval --impure --json path:.#nixosConfigurations.desktop.config.programs.steam.enable` returned `true`.
+- Passed targeted graph evaluation: `nix eval --impure --json path:.#nixosConfigurations.desktop.config.programs.gamemode.enable` returned `true`.
+- Passed laptop import boundary check: `if grep -Fq './gaming.nix' hosts/laptop/default.nix; then echo 'laptop imports gaming.nix'; exit 1; else echo 'laptop does not import gaming.nix'; fi` returned `laptop does not import gaming.nix`.
+
 ## Boundaries
 
 - Keep `modules/hardware/nvidia.nix` reusable and host selection explicit.
