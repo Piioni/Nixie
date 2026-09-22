@@ -62,16 +62,18 @@ settings to extract. A future networking module should be added only when those 
 - Passed targeted graph evaluation: `nix eval --impure --json path:.#nixosConfigurations.desktop.config.programs.steam.enable` returned `true`.
 - Passed targeted graph evaluation: `nix eval --impure --json path:.#nixosConfigurations.desktop.config.programs.gamemode.enable` returned `true`.
 - Passed laptop import boundary check: `if grep -Fq './gaming.nix' hosts/laptop/default.nix; then echo 'laptop imports gaming.nix'; exit 1; else echo 'laptop does not import gaming.nix'; fi` returned `laptop does not import gaming.nix`.
+- Passed targeted evaluation: laptop PPD is `true`, `HandleLidSwitch` is `suspend`, and `HandleLidSwitchExternalPower` is `ignore`.
 
 ## Final verification for the current batch
 
 - Passed: `nix flake show` lists `desktop` and `laptop`.
 - Passed: Nix formatter checks for host modules and `git diff --check`.
 - Passed targeted evaluation: desktop graphics, Steam, and GameMode are enabled; laptop power profiles are enabled;
-  desktop power profiles are disabled; laptop state version is `25.11`.
-- Passed import boundaries: desktop owns NVIDIA and gaming; laptop owns power profiles; neither crosses the other
-  host's module boundary.
-- Tracked worktree is clean after commits `1a4ab8f`, `d267646`, `dda4716`, `99bd7fc`, and `e0e3951`.
+  desktop power profiles are disabled; laptop lid policy is battery suspend / external-power ignore; laptop state version
+  is `25.11`.
+- Passed import boundaries: desktop owns NVIDIA and gaming; laptop owns power profiles and lid policy; neither crosses
+  the other host's module boundary.
+- Tracked worktree is clean after commits `1a4ab8f`, `d267646`, `dda4716`, `99bd7fc`, `e0e3951`, and `260c5c5`.
 - Markdown Prettier verification is unavailable because `prettier` is not installed; no Markdown formatting error was
   reported by the repository write tool.
 - Full production toplevel remains blocked by the pre-existing missing root filesystem and GRUB-device assertions;
