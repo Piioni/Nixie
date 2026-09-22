@@ -568,13 +568,20 @@ without tripping the "untracked path" evaluation error.
 
 | # | Rule | Pass condition |
 |---|---|---|
-| R1 | **Primary payload witness.** Materialised tree comparison, *laptop-after* vs *pre-change desktop*: sorted path set + byte-for-byte content (`diff -r`, dereferencing symlinks) | Empty output for both `find`-diff and `diff -r` |
+| R1 | **Primary payload witness.** Materialised tree comparison, *laptop-after* vs *pre-change desktop*: sorted path set + byte-for-byte content (`diff -r`, dereferencing symlinks) | Empty output for both `find`-diff and `diff -r` **(superseded as a whole-tree acceptance criterion — see "Witness amendment (authorized)"; the operative witness is W1 + W2 + W3)** |
 | R2 | **Option-level witness.** Sorted `attrNames home.file`, after the **recursive-expansion rule**: an entry with `recursive = true` expands to the leaf paths under its `source`; all other entries contribute their own key | Set equality, plus an itemised raw-key delta of exactly one removal (`…/hypr/lua`) and exactly eleven additions (`…/hypr/lua/<name>.lua`) and nothing else |
 | R3 | **Ownership.** No raw target is a path-prefix of another | Payload assertion (§6.3) passes; snapshot re-check agrees |
 | R4 | **Pure move (WU1 only).** Desktop `toplevel.drvPath` | Byte-equal to `desktop-toplevel.drvPath` |
 | R5 | **Divergence.** Desktop materialised content against the §7.5 table | Every enumerated item absent/disabled; **any** other drift reported separately |
 | R6 | **Warning.** Desktop gate stderr | Contains the un-captured-topology warning; the laptop's gate does not |
 | R7 | **Structural checks.** `nix flake show` lists exactly `desktop` and `laptop`; recorder contains the raw-key delta and gate commands and must never contain a hardcoded total target count; `nixfmt --check` exits 0 | As stated |
+
+**R1 superseded.** The R1 pass condition above (empty output for both `find`-diff and `diff -r` over the whole
+materialised tree) is unreachable for any change that alters the module graph — a Home-Manager-generated
+`home-files` file embeds the `home.path` store path, and the pre-change `system.build.toplevel.drvPath`
+equality is unreachable for the same reason. The original wording is kept above for history and is
+superseded by the operative witness **W1 + W2 + W3** in the "Witness amendment (authorized)" section at the
+end of this document. `R4` is unaffected: it is scoped to the WU1 pure move, succeeded, and is not weakened.
 
 ### 9.3 Commands (all unverified — no shell in this phase)
 
@@ -768,3 +775,58 @@ a follow-up, not part of this change.
 3. Home Manager's `.text` route is byte-faithful because `types.lines` with a single definition is the identity and `writeTextFile` writes with `printf "%s"`.
 4. Nix renders floats as six decimals, so any byte-exact Lua numeric literal must be declared as a string rather than `types.float`.
 5. The strongest refactor witness for this repo is the materialised `home-files` tree, because two payload targets (`caelestia/shell.json`, `herdr/config.toml`) are already rendered today.
+
+---
+
+## Witness amendment (authorized)
+
+**Provenance.** This amendment was discovered during the `apply` phase, proven by parent-run experiments, and
+explicitly authorized by the user. The full finding and its causal analysis are recorded in
+`openspec/changes/multi-workstation-architecture/apply-progress.md` (sections *"R4 / non-negotiable #7 —
+desktop `drvPath` vs the recorded oracle"*, *"Cause of the desktop `drvPath` delta (bisected, not
+guessed)"*, *"G2 — materialised payload witness (R1)"*, and *"Witness residual requiring parent judgement
+(not absorbed)"*). This section is the operative witness; the superseded criterion is kept below for history.
+
+**Superseded criterion (retained, not deleted).** As a general requirement for this change, the original
+record required:
+
+> **R1 — Primary payload witness.** Materialised tree comparison, *laptop-after* vs *pre-change desktop*:
+> sorted path set + byte-for-byte content (`diff -r`, dereferencing symlinks) → empty output for both
+> `find`-diff and `diff -r`
+>
+> plus `system.build.toplevel.drvPath` equality across the refactor.
+
+**Why it is unreachable, not missed.** Whole-tree byte equality of the materialised `home-files` tree, and
+`system.build.toplevel.drvPath` equality of the toplevel, are unreachable for *any* change that alters the
+module graph. This refactor is such a change. The criteria were unreachable as written, not missed.
+
+| Variant | `toplevel` drvPath | `home.path` | entries | content vs oracle |
+| --- | --- | --- | --- | --- |
+| oracle (pre-change) | `26i3y9sw…` | `4gw1bjqn…` | 1539 | — |
+| V0 per-host `imports` wrapper (current WU2 state) | `yq177ir6…` | `yxvaxdivd…` | 1539 | **byte-identical** |
+| V1 direct assignment, imports list left intact | `26i3y9sw…` | unchanged | — | — |
+| V5 direct assignment, imports split into `base`/`gui` roles | `1g62rdza…` | `5wi4vfwl…` | 1539 | **byte-identical** |
+
+`diff -r` between the oracle's `home.path` and each of the two changed variants exits **0**, with 1539
+entries on each side. Three distinct derivation hashes, one identical built content.
+
+**Mechanism.** Home Manager's `buildEnv` for `home.path` is sensitive to the **order** of the package list,
+and the shape of the module graph determines that order. The package set is identical; only the ordering
+differs, so hashes differ while built content does not. V5 proves the effect is not caused by the `imports`
+wrapper: splitting the imports into role layers moves the hash on its own, with the wrapper removed. V1
+preserves the hash but cannot express role layers, which is the entire purpose of this change.
+
+**Operative witness (supersedes R1).**
+
+- **W1 — target set equality.** The expanded `home.file` target set must be **set-equal** to the captured
+  pre-change snapshot, applying the recursive-expansion rule for `recursive = true` entries. **Never a
+  count**: no total target count may appear as a constant anywhere.
+- **W2 — payload byte equality.** The seven host-scoped payload files must be byte-identical to their
+  pre-change rendered content.
+- **W3 — package layer content identity.** The built `home.path` derivation must be byte-identical to the
+  pre-change one under `diff -r`. This witnesses package **content** independently of its hash, which is
+  strictly stronger than comparing derivation paths.
+
+**Not weakened — `R4`.** The `drvPath` equality witness for the WU1 NVIDIA pure move (`R4`, §9.2, and the
+§8 witness) **succeeded** and is left intact. It is scoped to the pure move it already witnessed and is not
+a general-purpose witness that later units must satisfy.

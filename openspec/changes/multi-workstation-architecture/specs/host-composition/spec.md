@@ -78,11 +78,22 @@ pre-change evaluation was the migrated machine's own configuration, the regressi
 *new host after* against *recorded pre-change evaluation*, and a desktop-against-desktop comparison
 MUST NOT be used as a regression witness.
 
+**Superseded (see "Witness amendment (authorized)").** The requirement's *per-target content comparison*
+was a whole-tree byte-equality claim, and it stood alongside `system.build.toplevel.drvPath` equality
+across the refactor. The original wording is retained above for history; the operative witness is now
+**W1** (set-equal expanded `home.file` target set — never a count) **+ W2** (the seven host-scoped payload
+files byte-identical) **+ W3** (built `home.path` byte-identical under `diff -r`).
+
 #### Scenario: The migrated-from machine reproduces the recorded pre-change payload
 
 - GIVEN the recorded pre-change `attrNames home-manager.users.piioni.home.file` and the recorded per-target contents for the pre-change `nixosConfigurations.desktop`
 - WHEN the laptop host is evaluated after the change
 - THEN the sorted laptop target set equals the recorded snapshot and each target's rendered content equals the recorded pre-change content
+
+The scenario's "each target's rendered content equals the recorded pre-change content" is superseded as a
+whole-tree claim by **W1 + W2 + W3** (see "Witness amendment (authorized)" at the end of this file): the
+laptop target set must be set-equal (recursive entries expanded), the seven host-scoped payload files must
+be byte-identical, and the built `home.path` must be byte-identical under `diff -r`.
 
 #### Scenario: The desktop divergence is judged item by item
 
@@ -170,7 +181,8 @@ evaluated per declared host through `extendModules` with the evaluation-only boo
 non-Git copy of the working tree. `nix flake check` MUST NOT be used, because it forces the toplevel
 without the stub and dies on the pre-existing filesystem and boot-loader assertions. Derivation-path
 equality MUST be claimed only for a pure move; when evaluated content legitimately changes, the
-witness MUST degrade to the target-set snapshot plus a rendered-content diff.
+witness MUST degrade to the target-set snapshot plus a rendered-content diff — concretely, to **W1 + W2 +
+W3** in "Witness amendment (authorized)".
 
 #### Scenario: Every declared host passes the gate
 
@@ -195,3 +207,54 @@ witness MUST degrade to the target-set snapshot plus a rendered-content diff.
 - GIVEN the changed tree
 - WHEN `nix run .#formatter.x86_64-linux -- --check $(git ls-files '*.nix')` runs
 - THEN it exits 0
+
+---
+
+## Witness amendment (authorized)
+
+**Provenance.** This amendment was discovered during the `apply` phase, proven by parent-run experiments, and
+explicitly authorized by the user. The full finding and its causal analysis are recorded in
+`openspec/changes/multi-workstation-architecture/apply-progress.md` (sections *"R4 / non-negotiable #7 —
+desktop `drvPath` vs the recorded oracle"*, *"G2 — materialised payload witness (R1)"*, and *"Witness
+residual requiring parent judgement (not absorbed)"*), and the operative witness is stated in
+`design.md` → `## Witness amendment (authorized)`.
+
+**Superseded criterion (retained, not deleted).** As a general requirement for this change, the original
+record required whole-tree byte equality of the materialised `home-files` tree ("a sorted comparison of the
+`home.file` target set plus a per-target content comparison", with "each target's rendered content equals the
+recorded pre-change content") together with `system.build.toplevel.drvPath` equality across the refactor.
+
+**Why it is unreachable, not missed.** Whole-tree byte equality of the materialised `home-files` tree, and
+`system.build.toplevel.drvPath` equality of the toplevel, are unreachable for *any* change that alters the
+module graph. This refactor is such a change. The criteria were unreachable as written, not missed.
+
+| Variant | `toplevel` drvPath | `home.path` | entries | content vs oracle |
+| --- | --- | --- | --- | --- |
+| oracle (pre-change) | `26i3y9sw…` | `4gw1bjqn…` | 1539 | — |
+| V0 per-host `imports` wrapper (current WU2 state) | `yq177ir6…` | `yxvaxdivd…` | 1539 | **byte-identical** |
+| V1 direct assignment, imports list left intact | `26i3y9sw…` | unchanged | — | — |
+| V5 direct assignment, imports split into `base`/`gui` roles | `1g62rdza…` | `5wi4vfwl…` | 1539 | **byte-identical** |
+
+`diff -r` between the oracle's `home.path` and each of the two changed variants exits **0**, with 1539
+entries on each side. Three distinct derivation hashes, one identical built content.
+
+**Mechanism.** Home Manager's `buildEnv` for `home.path` is sensitive to the **order** of the package list,
+and the shape of the module graph determines that order. The package set is identical; only the ordering
+differs, so hashes differ while built content does not. V5 proves the effect is not caused by the `imports`
+wrapper: splitting the imports into role layers moves the hash on its own, with the wrapper removed. V1
+preserves the hash but cannot express role layers, which is the entire purpose of this change.
+
+**Operative witness (supersedes the whole-tree comparison).**
+
+- **W1 — target set equality.** The expanded `home.file` target set must be **set-equal** to the captured
+  pre-change snapshot, applying the recursive-expansion rule for `recursive = true` entries. **Never a
+  count**: no total target count may appear as a constant anywhere.
+- **W2 — payload byte equality.** The seven host-scoped payload files must be byte-identical to their
+  pre-change rendered content.
+- **W3 — package layer content identity.** The built `home.path` derivation must be byte-identical to the
+  pre-change one under `diff -r`. This witnesses package **content** independently of its hash, which is
+  strictly stronger than comparing derivation paths.
+
+**Not weakened — `R4`.** The WU1 NVIDIA pure-move `drvPath` equality witness (`R4` in `design.md` §9.2 and
+`specs/hardware-modules/spec.md`) succeeded and is left intact. It is scoped to the pure move it already
+witnessed and is not a general-purpose witness that later units must satisfy.

@@ -114,6 +114,12 @@ three-layer split MUST NOT be introduced while no non-graphical machine is defin
 - WHEN that host's target set and rendered content are compared with the previous profile
 - THEN they are equal
 
+This scenario was originally phrased as whole-profile equality ("target set and rendered content … are
+equal"). Whole-tree byte equality of the materialised tree is unreachable for any module-graph change (see
+"Witness amendment (authorized)" at the end of this file). The operative reading for this scenario is W1
+(set-equal expanded target set) plus W2 (the seven host-scoped files byte-identical), never a whole-tree
+comparison.
+
 #### Scenario: The graphical layer is the only host-sensitive layer
 
 - GIVEN the two role layers
@@ -133,3 +139,54 @@ change.
 - GIVEN both hosts
 - WHEN their rendered payloads are inspected
 - THEN `tuxedo-rs` is installed and its configuration target is present for both hosts
+
+---
+
+## Witness amendment (authorized)
+
+**Provenance.** This amendment was discovered during the `apply` phase, proven by parent-run experiments, and
+explicitly authorized by the user. The full finding and its causal analysis are recorded in
+`openspec/changes/multi-workstation-architecture/apply-progress.md` (sections *"R4 / non-negotiable #7 —
+desktop `drvPath` vs the recorded oracle"*, *"G2 — materialised payload witness (R1)"*, and *"Witness
+residual requiring parent judgement (not absorbed)"*), and the operative witness is stated in
+`design.md` → `## Witness amendment (authorized)`.
+
+**Superseded criterion (retained, not deleted).** Where this spec compared the whole profile — "that host's
+target set and rendered content are compared with the previous profile → they are equal" — as a general
+requirement for this change, the whole-tree reading required byte equality of the materialised tree. It also
+stood alongside `system.build.toplevel.drvPath` equality across the refactor.
+
+**Why it is unreachable, not missed.** Whole-tree byte equality of the materialised `home-files` tree, and
+`system.build.toplevel.drvPath` equality of the toplevel, are unreachable for *any* change that alters the
+module graph. This refactor is such a change. The criteria were unreachable as written, not missed.
+
+| Variant | `toplevel` drvPath | `home.path` | entries | content vs oracle |
+| --- | --- | --- | --- | --- |
+| oracle (pre-change) | `26i3y9sw…` | `4gw1bjqn…` | 1539 | — |
+| V0 per-host `imports` wrapper (current WU2 state) | `yq177ir6…` | `yxvaxdivd…` | 1539 | **byte-identical** |
+| V1 direct assignment, imports list left intact | `26i3y9sw…` | unchanged | — | — |
+| V5 direct assignment, imports split into `base`/`gui` roles | `1g62rdza…` | `5wi4vfwl…` | 1539 | **byte-identical** |
+
+`diff -r` between the oracle's `home.path` and each of the two changed variants exits **0**, with 1539
+entries on each side. Three distinct derivation hashes, one identical built content.
+
+**Mechanism.** Home Manager's `buildEnv` for `home.path` is sensitive to the **order** of the package list,
+and the shape of the module graph determines that order. The package set is identical; only the ordering
+differs, so hashes differ while built content does not. V5 proves the effect is not caused by the `imports`
+wrapper: splitting the imports into role layers moves the hash on its own, with the wrapper removed. V1
+preserves the hash but cannot express role layers, which is the entire purpose of this change.
+
+**Operative witness (supersedes the whole-profile comparison).**
+
+- **W1 — target set equality.** The expanded `home.file` target set must be **set-equal** to the captured
+  pre-change snapshot, applying the recursive-expansion rule for `recursive = true` entries. **Never a
+  count**: no total target count may appear as a constant anywhere.
+- **W2 — payload byte equality.** The seven host-scoped payload files must be byte-identical to their
+  pre-change rendered content.
+- **W3 — package layer content identity.** The built `home.path` derivation must be byte-identical to the
+  pre-change one under `diff -r`. This witnesses package **content** independently of its hash, which is
+  strictly stronger than comparing derivation paths.
+
+**Not weakened — `R4`.** This amendment does not touch the WU1 NVIDIA pure-move `drvPath` equality witness
+(`R4` in `design.md` §9.2 and `specs/hardware-modules/spec.md`), which succeeded and stays scoped to the pure
+move. It is not a general-purpose witness that later units must satisfy.
