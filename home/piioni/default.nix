@@ -1,26 +1,7 @@
 { ... }:
 {
   imports = [
-    ./agents.nix
-    ./btop.nix
-    ./caelestia.nix
-    ./fastfetch.nix
-    ./ghostty.nix
-    ./herdr.nix
-    ./hypr.nix
-    ./kitty.nix
-    ./lazygit.nix
-    ./moshi.nix
-    ./nushell.nix
-    ./packages.nix
-    ./starship.nix
-    ./swappy.nix
-    ./swayimg.nix
-    ./swaync.nix
-    ./tuxedo.nix
-    ./yazi.nix
-    ./zed.nix
-    ./zellij.nix
+    ./workstation.nix
   ];
 
   home.username = "piioni";

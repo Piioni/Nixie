@@ -177,18 +177,18 @@ profile import in `modules/home-manager.nix`, remove the laptop block from
 unaffected.
 **Commit boundary:** one commit — a seam without a second host is not reviewable as behaviour.
 
-- [ ] Remove the hardcoded profile import from `modules/home-manager.nix` (it currently declares `users.piioni` as an inline relative import of the profile directory), leaving a comment recording that the user is declared per host; confirm no user name remains in that file. <!-- sdd-owner: implementation -->
-- [ ] Create `hosts/desktop/home.nix` declaring `home-manager.users.piioni.imports` to include the profile directory `home/piioni` (identity only; role layers arrive in WU3a). The exact relative spelling of that import is recorded in `design.md` §4.2. <!-- sdd-owner: implementation -->
-- [ ] Create `hosts/laptop/host.nix` with `networking.hostName = "laptop"` and `system.stateVersion = "25.11"` (design default, see O1). <!-- sdd-owner: implementation -->
-- [ ] Create `hosts/laptop/default.nix` importing `../../modules`, `./host.nix`, `./home.nix` plus the `lib.optional (builtins.pathExists ./hardware-configuration.nix)` guard, and **not** importing `modules/hardware/nvidia.nix`. <!-- sdd-owner: implementation -->
-- [ ] Create `hosts/laptop/home.nix` with the same `users.piioni.imports` path as the desktop's. <!-- sdd-owner: implementation -->
-- [ ] Add `./home.nix` to the `hosts/desktop/default.nix` import list. <!-- sdd-owner: implementation -->
-- [ ] Add an explicit `nixosConfigurations.laptop` block to `flake.nix` (same `system`, same `specialArgs.homeManager`, importing `./hosts/laptop/default.nix`); confirm `specialArgs` still carries **only** `homeManager` and no host facts. <!-- sdd-owner: implementation -->
-- [ ] Run G1 for `desktop` and `laptop`; both must exit 0. <!-- sdd-owner: implementation -->
-- [ ] Run G2/G3 for `laptop` against the WU0 oracle (R1 byte-for-byte materialised-tree equality, R2 recursive-expansion set equality on the laptop side); also confirm `desktop` still reproduces its own pre-change payload at this unit. <!-- sdd-owner: implementation -->
-- [ ] Run G4 inside the `rsync` copy and confirm it lists exactly `desktop` and `laptop`. <!-- sdd-owner: implementation -->
-- [ ] Confirm the laptop declares no NVIDIA driver, DRM kernel parameter, or NVIDIA package setting (grep over `hosts/laptop/**`). <!-- sdd-owner: implementation -->
-- [ ] Run G5 naming each new `.nix` file explicitly. <!-- sdd-owner: implementation -->
+- [x] Remove the hardcoded profile import from `modules/home-manager.nix` (it currently declares `users.piioni` as an inline relative import of the profile directory), leaving a comment recording that the user is declared per host; confirm no user name remains in that file. <!-- sdd-owner: implementation -->
+- [x] Create `hosts/desktop/home.nix` declaring `home-manager.users.piioni.imports` to include the profile directory `home/piioni` (identity only; role layers arrive in WU3a). The exact relative spelling of that import is recorded in `design.md` §4.2. <!-- sdd-owner: implementation -->
+- [x] Create `hosts/laptop/host.nix` with `networking.hostName = "laptop"` and `system.stateVersion = "25.11"` (design default, see O1). <!-- sdd-owner: implementation -->
+- [x] Create `hosts/laptop/default.nix` importing `../../modules`, `./host.nix`, `./home.nix` plus the `lib.optional (builtins.pathExists ./hardware-configuration.nix)` guard, and **not** importing `modules/hardware/nvidia.nix`. <!-- sdd-owner: implementation -->
+- [x] Create `hosts/laptop/home.nix` with the same `users.piioni.imports` path as the desktop's. <!-- sdd-owner: implementation -->
+- [x] Add `./home.nix` to the `hosts/desktop/default.nix` import list. <!-- sdd-owner: implementation -->
+- [x] Add an explicit `nixosConfigurations.laptop` block to `flake.nix` (same `system`, same `specialArgs.homeManager`, importing `./hosts/laptop/default.nix`); confirm `specialArgs` still carries **only** `homeManager` and no host facts. <!-- sdd-owner: implementation -->
+- [x] Run G1 for `desktop` and `laptop`; both must exit 0. <!-- sdd-owner: implementation -->
+- [x] Run G2/G3 for `laptop` against the WU0 oracle (R1 byte-for-byte materialised-tree equality, R2 recursive-expansion set equality on the laptop side); also confirm `desktop` still reproduces its own pre-change payload at this unit. <!-- sdd-owner: implementation -->
+- [x] Run G4 inside the `rsync` copy and confirm it lists exactly `desktop` and `laptop`. <!-- sdd-owner: implementation -->
+- [x] Confirm the laptop declares no NVIDIA driver, DRM kernel parameter, or NVIDIA package setting (grep over `hosts/laptop/**`). <!-- sdd-owner: implementation -->
+- [x] Run G5 naming each new `.nix` file explicitly. <!-- sdd-owner: implementation -->
 
 ---
 
@@ -210,16 +210,16 @@ carries the **laptop-mirrored** values, so WU3b's byte-equality witness covers b
 is therefore temporarily dishonest; WU4 replaces those values and removes the mirror comment. Any
 reviewer seeing laptop values in the desktop host file before WU4 is seeing the design, not a mistake.
 
-- [ ] Create `home/piioni/workstation.nix` declaring `options.nixie.workstation` with `display` (`nullOr`, submodule of `outputs` + `pins`), `touchpad`, `brightnessKeys`, `batteryUi` — **all four required, no defaults**; `scale` and the pin fields are `types.str`, `guard` is a two-value enum; the file holds **no facts** and owns the un-captured-topology `warnings` entry. <!-- sdd-owner: implementation -->
-- [ ] Create `hosts/laptop/facts.nix` as a Home Manager module declaring the captured topology (`eDP-1` 1920x1080@60 at 0x0 `scale = "1"`; `HDMI-A-1` 1920x1080@120 at 1920x0 `scale = "1"`), the two pin groups (`hdmi`/`monitor-exists`/`1 2 3 4`, then `edp`/`unconditional`/`5 6` — declaration order is output order), and `touchpad`/`brightnessKeys`/`batteryUi` = `true`. <!-- sdd-owner: implementation -->
-- [ ] Create `hosts/desktop/facts.nix` with the laptop-mirrored values plus a comment naming WU4 as the owner of the final values. <!-- sdd-owner: implementation -->
-- [ ] Create `home/piioni/base.nix` (11 imports: `agents`, `fastfetch`, `herdr`, `lazygit`, `moshi`, `nushell`, `packages`, `starship`, `tuxedo`, `yazi`, `zellij`) and `home/piioni/gui.nix` (9 imports: `btop`, `caelestia`, `ghostty`, `hypr`, `kitty`, `swappy`, `swayimg`, `swaync`, `zed`); `btop` sits in `gui` because its config target carries a host fact. <!-- sdd-owner: implementation -->
-- [ ] Rewrite `home/piioni/default.nix` to identity only (`home.username`, `home.homeDirectory`, `home.stateVersion = "25.11"` unchanged, `programs.home-manager.enable`) plus `imports = [ ./workstation.nix ]`. <!-- sdd-owner: implementation -->
-- [ ] Extend `hosts/desktop/home.nix` and `hosts/laptop/home.nix` imports with `home/piioni/base.nix`, `home/piioni/gui.nix`, `./facts.nix`. The exact relative spelling of those imports is recorded in `design.md` §4.2. <!-- sdd-owner: implementation -->
-- [ ] Verify the union of `base.nix` + `gui.nix` equals the previous unconditional import list as a **set** (no module added, dropped, or moved out of the profile). <!-- sdd-owner: implementation -->
-- [ ] Confirm no consumer reads `config.nixie.workstation` yet and that no file under `home/` contains a host name (`desktop`/`laptop`) or a machine literal. <!-- sdd-owner: implementation -->
-- [ ] Run G1 for both hosts (exit 0) and G2/G3 for the laptop: the payload must still be byte-identical to the pre-change oracle, proving the facts are declared but not yet consumed. <!-- sdd-owner: implementation -->
-- [ ] Run G5 over every new `.nix` file. <!-- sdd-owner: implementation -->
+- [x] Create `home/piioni/workstation.nix` declaring `options.nixie.workstation` with `display` (`nullOr`, submodule of `outputs` + `pins`), `touchpad`, `brightnessKeys`, `batteryUi` — **all four required, no defaults**; `scale` and the pin fields are `types.str`, `guard` is a two-value enum; the file holds **no facts** and owns the un-captured-topology `warnings` entry. <!-- sdd-owner: implementation -->
+- [x] Create `hosts/laptop/facts.nix` as a Home Manager module declaring the captured topology (`eDP-1` 1920x1080@60 at 0x0 `scale = "1"`; `HDMI-A-1` 1920x1080@120 at 1920x0 `scale = "1"`), the two pin groups (`hdmi`/`monitor-exists`/`1 2 3 4`, then `edp`/`unconditional`/`5 6` — declaration order is output order), and `touchpad`/`brightnessKeys`/`batteryUi` = `true`. <!-- sdd-owner: implementation -->
+- [x] Create `hosts/desktop/facts.nix` with the laptop-mirrored values plus a comment naming WU4 as the owner of the final values. <!-- sdd-owner: implementation -->
+- [x] Create `home/piioni/base.nix` (11 imports: `agents`, `fastfetch`, `herdr`, `lazygit`, `moshi`, `nushell`, `packages`, `starship`, `tuxedo`, `yazi`, `zellij`) and `home/piioni/gui.nix` (9 imports: `btop`, `caelestia`, `ghostty`, `hypr`, `kitty`, `swappy`, `swayimg`, `swaync`, `zed`); `btop` sits in `gui` because its config target carries a host fact. <!-- sdd-owner: implementation -->
+- [x] Rewrite `home/piioni/default.nix` to identity only (`home.username`, `home.homeDirectory`, `home.stateVersion = "25.11"` unchanged, `programs.home-manager.enable`) plus `imports = [ ./workstation.nix ]`. <!-- sdd-owner: implementation -->
+- [x] Extend `hosts/desktop/home.nix` and `hosts/laptop/home.nix` imports with `home/piioni/base.nix`, `home/piioni/gui.nix`, `./facts.nix`. The exact relative spelling of those imports is recorded in `design.md` §4.2. <!-- sdd-owner: implementation -->
+- [x] Verify the union of `base.nix` + `gui.nix` equals the previous unconditional import list as a **set** (no module added, dropped, or moved out of the profile). <!-- sdd-owner: implementation -->
+- [x] Confirm no consumer reads `config.nixie.workstation` yet and that no file under `home/` contains a host name (`desktop`/`laptop`) or a machine literal. <!-- sdd-owner: implementation -->
+- [x] Run G1 for both hosts (exit 0) and G2/G3 for the laptop: the payload must still be byte-identical to the pre-change oracle, proving the facts are declared but not yet consumed. <!-- sdd-owner: implementation -->
+- [x] Run G5 over every new `.nix` file. <!-- sdd-owner: implementation -->
 
 ---
 
