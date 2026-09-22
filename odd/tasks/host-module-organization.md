@@ -65,12 +65,16 @@ settings to extract. A future networking module should be added only when those 
 ## Final verification for the current batch
 
 - Passed: `nix flake show` lists `desktop` and `laptop`.
-- Passed: formatter checks for the changed host modules and `git diff --check`.
-- Passed targeted evaluation: desktop graphics, Steam, and GameMode are enabled; laptop state version is `25.11`.
-- Passed import boundary: desktop owns NVIDIA and gaming; laptop does not import the desktop gaming module.
-- Tracked worktree is clean after commits `1a4ab8f`, `d267646`, and `dda4716`.
+- Passed: Nix formatter checks for host modules and `git diff --check`.
+- Passed targeted evaluation: desktop graphics, Steam, and GameMode are enabled; laptop power profiles are enabled;
+  desktop power profiles are disabled; laptop state version is `25.11`.
+- Passed import boundaries: desktop owns NVIDIA and gaming; laptop owns power profiles; neither crosses the other
+  host's module boundary.
+- Tracked worktree is clean after commits `1a4ab8f`, `d267646`, `dda4716`, `99bd7fc`, and `e0e3951`.
+- Markdown Prettier verification is unavailable because `prettier` is not installed; no Markdown formatting error was
+  reported by the repository write tool.
 - Full production toplevel remains blocked by the pre-existing missing root filesystem and GRUB-device assertions;
-  the stubbed targeted evaluation succeeds apart from the known Yazi warning.
+  targeted evaluations succeed apart from the known Yazi warning.
 
 ## Boundaries
 
