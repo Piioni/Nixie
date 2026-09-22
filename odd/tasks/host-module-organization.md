@@ -12,7 +12,7 @@ Keep the direct `flake.nix -> hosts/<name>/default.nix` wiring. Each host's `def
 
 - [x] 1. Extract per-host hardware composition into `hosts/<name>/hardware.nix`.
 - [x] 2. Review and extract concrete host-specific networking configuration, if any.
-- [ ] 3. Review and extract concrete host-specific services or power configuration, if any.
+- [x] 3. Review and extract concrete host-specific services or power configuration, if any.
 - [x] 4. Verify each module transition and commit each meaningful work unit.
 
 ## Work unit 1: hardware composition
@@ -46,7 +46,13 @@ settings to extract. A future networking module should be added only when those 
 ## Work unit 3: desktop gaming module
 
 - [x] Add `hosts/desktop/gaming.nix` with Steam and GameMode enabled for desktop only.
-- [ ] Review and extract any other concrete host-specific services or power configuration, if needed.
+- [x] Review and extract any other concrete host-specific services or power configuration, if needed.
+
+### Laptop power
+
+- [x] Add `hosts/laptop/power.nix` with `services.power-profiles-daemon.enable = true` for laptop only.
+- [x] Keep the desktop composition free of the laptop power module.
+- [x] Leave lid and suspend policy intentionally undecided.
 
 ### Validation performed
 
