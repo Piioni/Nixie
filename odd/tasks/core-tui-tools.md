@@ -7,7 +7,7 @@ Create `home/core/tui.nix` to group fzf, bat, eza, and zoxide Home Manager confi
 ## Work units
 
 - [x] Consolidate bat/fzf/eza/zoxide declarations in `home/core/tui.nix`, add the module to the core aggregator, remove superseded declarations/modules, and remove the now-invalid Caelestia theme reference from btop while preserving its existing file deletion.
-- [ ] Verify desktop/laptop package and integration options, ensure existing Nushell aliases and zoxide integration are preserved, then commit.
+- [x] Verify desktop/laptop package and integration options, ensure existing Nushell aliases and zoxide integration are preserved, then commit `adee47d`.
 
 ## Boundaries
 
@@ -26,3 +26,4 @@ Create `home/core/tui.nix` to group fzf, bat, eza, and zoxide Home Manager confi
 - Impure host toplevel derivation evaluation with the repository's generated-filesystem/GRUB stub — desktop and laptop both passed using a temporary copy that does not preserve archived evidence permissions. The first attempt returned exit 1 only because cleanup could not remove the protected-mode temporary copy; no source/evidence files were changed. The safe rerun returned both derivation paths and cleaned its temp directory successfully.
 - Evaluated Home Manager values on both hosts: fzf, bat, eza, zoxide enabled; fzf integrations disabled; eza Git enabled, icons `auto`, integrations disabled; zoxide Nushell integration only; no Caelestia btop target.
 - Existing Nushell aliases were unchanged; the Caelestia theme remains deleted as explicitly authorized. Existing Yazi legacy-default warning remains.
+- Work-unit commit: `adee47d feat(home): group core terminal tools`.
