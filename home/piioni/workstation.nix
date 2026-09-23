@@ -85,7 +85,7 @@ in
       nixie: this host's display topology is not captured
       (nixie.workstation.display = null). No monitor directives and no workspace pins
       will be emitted; the compositor will auto-detect. Capture with `hyprctl monitors`
-      and fill the host's facts.nix.
+      and fill the host's direct Home Manager workstation configuration.
     '';
   };
 }
