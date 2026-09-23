@@ -130,7 +130,8 @@ were removed after their values were moved without change.
 - Passed parent spot-check: desktop PipeWire evaluates to `true`.
 - No repository test runner or TDD configuration was found; normal Nix functional checks were used. No build, activation, or system switch was run.
 - Native risk assessment was unavailable (empty native output); the independent read-only verifier completed the requested checks successfully.
-- No files under `hosts/` changed. Pre-existing Home Manager edits were preserved and not staged. No commit was created.
+- No files under `hosts/` changed. Pre-existing Home Manager edits were preserved and not staged.
+- Committed as `2bc4dae` (`refactor(modules): centralize shared audio and fonts`).
 - Historical OpenSpec documents still describe the previous module paths; they were left untouched because they are historical artifacts outside this work unit's scope.
 
 ### Progress
