@@ -13,5 +13,11 @@ core*
 first_steps.md
 references/
 
+.ruff_cache/
+
 # Local Pi runtime state
 .atl/
+.pi/
+.pi-lens.json
+odd/
+openspec/
