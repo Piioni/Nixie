@@ -23,9 +23,7 @@ in
     "zellij/zjstatus.wasm".source = zjstatus;
 
     "zellij/layouts/default.kdl".text =
-      lib.replaceStrings
-        [ "file:/home/piioni/.config/zellij/zjstatus.wasm" ]
-        [ "file:${config.xdg.configHome}/zellij/zjstatus.wasm" ]
+      lib.replaceStrings [ "@ZJSTATUS_WASM@" ] [ "file:${config.xdg.configHome}/zellij/zjstatus.wasm" ]
         (builtins.readFile ./zellij/layouts/default.kdl);
   };
 }

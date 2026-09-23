@@ -1,6 +1,6 @@
 { config, ... }:
 let
-  skillsPath = "${config.home.homeDirectory}/nix-config/home/agents/skills";
+  skillsPath = "${config.nixie.home.repositoryRoot}/home/agents/skills";
 in
 {
   xdg.configFile = {

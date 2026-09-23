@@ -111,7 +111,7 @@
     "session": {
         "commands": {
             "hibernate": [
-                "/home/piioni/.config/hypr/scripts/logout.sh"
+                "@HYPR_LOGOUT_SCRIPT@"
             ],
             "logout": [
                 "caelestia",

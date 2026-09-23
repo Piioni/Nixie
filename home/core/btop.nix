@@ -98,8 +98,8 @@
 
   xdg.configFile = {
     "btop/themes/catppuccin_macchiato.theme".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/core/btop/themes/catppuccin_macchiato.theme";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/core/btop/themes/catppuccin_macchiato.theme";
     "btop/themes/catppuccin_mocha.theme".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/core/btop/themes/catppuccin_mocha.theme";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/core/btop/themes/catppuccin_mocha.theme";
   };
 }

@@ -91,48 +91,48 @@
     };
 
     "swaync/style.css".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/style.css";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/style.css";
     "swaync/icons/airplane-mode-off.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/airplane-mode-off.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/airplane-mode-off.png";
     "swaync/icons/airplane-mode-on.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/airplane-mode-on.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/airplane-mode-on.png";
     "swaync/icons/bolt.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/bolt.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/bolt.png";
     "swaync/icons/brightness-100.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/brightness-100.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/brightness-100.png";
     "swaync/icons/brightness-20.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/brightness-20.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/brightness-20.png";
     "swaync/icons/brightness-40.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/brightness-40.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/brightness-40.png";
     "swaync/icons/brightness-60.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/brightness-60.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/brightness-60.png";
     "swaync/icons/brightness-80.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/brightness-80.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/brightness-80.png";
     "swaync/icons/gamemode.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/gamemode.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/gamemode.png";
     "swaync/icons/microphone-mute.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/microphone-mute.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/microphone-mute.png";
     "swaync/icons/microphone.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/microphone.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/microphone.png";
     "swaync/icons/music.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/music.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/music.png";
     "swaync/icons/palette.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/palette.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/palette.png";
     "swaync/icons/picture.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/picture.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/picture.png";
     "swaync/icons/play.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/play.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/play.png";
     "swaync/icons/timer.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/timer.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/timer.png";
     "swaync/icons/volume-high.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/volume-high.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/volume-high.png";
     "swaync/icons/volume-low.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/volume-low.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/volume-low.png";
     "swaync/icons/volume-mid.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/volume-mid.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/volume-mid.png";
     "swaync/icons/volume-mute.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/volume-mute.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/volume-mute.png";
     "swaync/icons/wand.png".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swaync/icons/wand.png";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/swaync/icons/wand.png";
   };
 }

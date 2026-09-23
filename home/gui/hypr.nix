@@ -8,7 +8,7 @@
 
   xdg.configFile = {
     "hypr/hyprland.lua".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/hypr/hyprland.lua";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/hypr/hyprland.lua";
 
     # WU3b replaces this recursive owner with direct and rendered leaf targets.
     "hypr/lua" = {
@@ -17,12 +17,12 @@
     };
 
     "hypr/scripts/colorpicker.sh".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/hypr/scripts/colorpicker.sh";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/hypr/scripts/colorpicker.sh";
     "hypr/scripts/helium-clean-singletons.sh".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/hypr/scripts/helium-clean-singletons.sh";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/hypr/scripts/helium-clean-singletons.sh";
     "hypr/scripts/logout.sh".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/hypr/scripts/logout.sh";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/hypr/scripts/logout.sh";
     "hypr/scripts/record.sh".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/hypr/scripts/record.sh";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/hypr/scripts/record.sh";
   };
 }

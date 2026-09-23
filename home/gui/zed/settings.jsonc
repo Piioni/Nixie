@@ -222,7 +222,7 @@
   "lsp": {
     "dart": {
       "binary": {
-        "path": "/home/piioni/fvm/versions/3.24.2/bin/dart",
+        "path": "@DART@",
         "arguments": ["language-server", "--protocol=lsp"],
       },
     },

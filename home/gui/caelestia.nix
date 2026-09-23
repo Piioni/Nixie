@@ -12,12 +12,10 @@
 
   xdg.configFile = {
     "caelestia/cli.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/caelestia/cli.json";
+      config.lib.file.mkOutOfStoreSymlink "${config.nixie.home.repositoryRoot}/home/gui/caelestia/cli.json";
 
     "caelestia/shell.json".text =
-      lib.replaceStrings
-        [ "/home/piioni/.config/hypr/scripts/logout.sh" ]
-        [ "${config.xdg.configHome}/hypr/scripts/logout.sh" ]
+      lib.replaceStrings [ "@HYPR_LOGOUT_SCRIPT@" ] [ "${config.xdg.configHome}/hypr/scripts/logout.sh" ]
         (builtins.readFile ./caelestia/shell.json);
   };
 }
