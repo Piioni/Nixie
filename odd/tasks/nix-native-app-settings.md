@@ -9,7 +9,7 @@ Remove redundant app config source files where their settings can be represented
 - [x] 1. Migrate Starship settings from `home/core/starship.toml` to Home Manager's `programs.starship.settings`; verify parity. Commit: `42a7ce2` (`refactor(home): define starship settings in nix`).
 - [x] 2. Migrate Fastfetch settings from `home/core/fastfetch/config.jsonc` to Home Manager's native settings; preserve module order and behavior. Commit: `934e897` (`refactor(home): define fastfetch settings in nix`).
 - [x] 3. Migrate only SwayNC's JSON settings into Nix-generated JSON; preserve manual package installation and do not enable the Home Manager systemd service; retain CSS/icons. Commit: `b0faa31` (`refactor(home): define swaync settings in nix`).
-- [x] 4. Migrate btop's explicit settings from `home/core/btop/btop.conf` to Home Manager's native settings; retain theme files/symlinks; commit pending.
+- [x] 4. Migrate btop's explicit settings from `home/core/btop/btop.conf` to Home Manager's native settings; retain theme files/symlinks. Commit: `b473db4` (`refactor(home): define btop settings in nix`).
 
 ## Verification evidence
 
@@ -39,6 +39,13 @@ Remove redundant app config source files where their settings can be represented
 - The generated native settings matched all 88 source assignments on desktop and laptop with exact keys, value types, and values.
 - `programs.btop` remains enabled with the same `pkgs.btop` package; all three theme symlinks are unchanged.
 - Removed `btop.conf` only after both host parity checks passed.
+
+### Integrated verification
+
+- Final formatter check passed for all four Nix modules.
+- `git diff --check HEAD~4..HEAD` passed.
+- Impure Home Manager activation evaluation passed for both desktop and laptop with the committed generated configurations.
+- Working tree is clean. No build or activation was run; the existing Yazi legacy-default warning remains.
 
 ## Boundaries
 
