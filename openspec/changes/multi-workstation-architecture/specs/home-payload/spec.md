@@ -29,7 +29,7 @@ Hyprland Lua regions, `caelestia/shell.json` (runtime-path substitution and late
 
 - GIVEN the hybrid boundary is established in WU3b
 - WHEN desktop-specific values diverge
-- THEN WU4 changes only host facts and does not change ownership of direct payload targets
+- THEN WU4 changes only the direct host assignment in `hosts/desktop/home.nix` and does not change ownership of direct payload targets
 
 ### Requirement: Home Manager Target Set Stability
 
@@ -64,7 +64,7 @@ becomes host-scoped MUST keep its target path so the `require` continues to reso
 
 ### Requirement: Host-Scoped Payload Rendering
 
-Host-scoped values MUST be rendered from host data rather than duplicated into per-host copies. The
+Host-scoped values MUST be rendered from direct host Home Manager assignments rather than duplicated into per-host copies. The
 seven payload files concerned are the monitor module, the workspace module, the input module, the
 gesture module, the key-bind module, the shell JSON, and the system-monitor configuration. For the
 machine the payload was migrated from, the rendered content of each of those seven files MUST be

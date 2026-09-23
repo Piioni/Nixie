@@ -49,11 +49,11 @@ behaviour baseline.
 
 ### Requirement: Host-Scoped Facts Are Data Consumed By Host-Agnostic Code
 
-Every per-machine fact MUST be declared as data in the host's own directory and consumed by shared,
-host-agnostic code. Shared consumers MUST NOT branch on a host name and MUST NOT contain
-machine-specific literals. Host data destined for the Home Manager layer MUST travel through the
-per-host Home Manager import path (or `home-manager.extraSpecialArgs` / `sharedModules`) and MUST NOT
-rely on `nixosSystem` `specialArgs`, which do not reach Home Manager modules. `modules/home-manager.nix`
+Every per-machine fact MUST be declared directly in the host's `home.nix` Home Manager user attrset and
+consumed by shared, host-agnostic code. Shared consumers MUST NOT branch on a host name and MUST NOT
+contain machine-specific literals. Host data destined for the Home Manager layer MUST use that direct
+per-host Home Manager assignment and MUST NOT rely on `nixosSystem` `specialArgs`, which do not reach
+Home Manager modules. `modules/home-manager.nix`
 MUST NOT hardcode a single Home Manager import for all hosts. Direct repository dotfiles may use the
 live checkout path through explicit out-of-store symlinks, but fact-dependent and substituted targets
 remain generated/store-backed; this ownership boundary is specified by home-payload WU3b, while WU4
@@ -69,7 +69,7 @@ changes host facts only.
 
 - GIVEN host data consumed by the Home Manager payload
 - WHEN the Home Manager modules are evaluated for either host
-- THEN the data arrives through the per-host import path and evaluation reports no undefined variable
+- THEN the data arrives through the direct per-host `home-manager.users.piioni` assignment and evaluation reports no undefined variable
 
 ### Requirement: Cross-Host Payload Equivalence
 

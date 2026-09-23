@@ -14,6 +14,7 @@ Keep the direct `flake.nix -> hosts/<name>/default.nix` wiring. Each host's `def
 - [x] 2. Review and extract concrete host-specific networking configuration, if any.
 - [x] 3. Review and extract concrete host-specific services or power configuration, if any.
 - [x] 4. Verify each module transition and commit each meaningful work unit.
+- [ ] 5. Move host-specific Home Manager values directly into each host's `home.nix` and remove transitional `facts.nix` files.
 
 ## Work unit 1: hardware composition
 
@@ -78,6 +79,12 @@ settings to extract. A future networking module should be added only when those 
   reported by the repository write tool.
 - Full production toplevel remains blocked by the pre-existing missing root filesystem and GRUB-device assertions;
   targeted evaluations succeed apart from the known Yazi warning.
+
+## Work unit 4: direct host configuration
+
+The shared `home/piioni/workstation.nix` schema remains reusable, but each host will assign its own
+`nixie.workstation` values directly in `hosts/<name>/home.nix`. Transitional `hosts/<name>/facts.nix` modules
+will be removed after their values are moved without change.
 
 ## Boundaries
 

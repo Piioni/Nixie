@@ -1,7 +1,7 @@
 # Design — host seam, host-scoped payload facts, reusable NVIDIA module
 
-The change lands as a **second host** (`hosts/laptop/`) plus a **per-host Home Manager import path**, four
-declared **host facts** (`display`, `touchpad`, `brightnessKeys`, `batteryUi`) consumed by host-agnostic
+The change lands as a **second host** (`hosts/laptop/`) plus **direct per-host Home Manager assignments**,
+four declared **host facts** (`display`, `touchpad`, `brightnessKeys`, `batteryUi`) consumed by host-agnostic
 payload code, a **pure move** of NVIDIA support into `modules/hardware/nvidia.nix`, and a **two-layer role
 split** (`base` + `gui`). The payload's *rendered* output on the migrated-from machine stays byte-identical;
 the desktop deliberately loses the laptop facts and carries an explicit `null` topology that warns instead
@@ -78,13 +78,11 @@ hosts/
     default.nix                            imports: ../../modules, ./host.nix, ./home.nix,
                                                      ../../modules/hardware/nvidia.nix, optional hardware-config
     host.nix                               networking.hostName = "desktop"; system.stateVersion
-    home.nix                               HM seam: imports payload + roles + ./facts.nix
-    facts.nix                              host facts: display = null, no touchpad/gestures/brightness/battery
+    home.nix                               HM seam: imports payload + roles; assigns desktop host facts
   laptop/                                  NEW
     default.nix                            imports: ../../modules, ./host.nix, ./home.nix, optional hardware-config
     host.nix                               networking.hostName = "laptop"; system.stateVersion = "25.11"
-    home.nix                               HM seam: imports payload + roles + ./facts.nix
-    facts.nix                              host facts: captured topology + both pin groups, touchpad, ...
+    home.nix                               HM seam: imports payload + roles; assigns captured host facts
 home/piioni/
   default.nix                              identity (username, homeDirectory, HM stateVersion) + fact schema
   workstation.nix                          NEW — host-fact schema and the un-captured-topology warning
@@ -97,9 +95,9 @@ home/piioni/
 
 Layout notes:
 
-- **`facts.nix`, not the proposal's working name `session.nix`.** The change has *no* session entry point
-  (explicit non-goal), so a file called `session.nix` would name a concept this change deliberately does not
-  introduce. Renamed; scope unchanged.
+- **Direct assignments, not the proposal's working name `session.nix`.** The change has *no* session entry
+  point (explicit non-goal), so a file called `session.nix` would name a concept this change deliberately does
+  not introduce. Host facts remain explicit inside each host's `home.nix`; scope unchanged.
 - **No `modules/hardware/default.nix`.** `modules/default.nix` must keep importing nothing NVIDIA-related, so
   that a host selects NVIDIA only by importing the file explicitly (spec: hardware-modules).
 - **No `lib/`, no inventory helper, no `mkEnableOption` framework** (proposal D1; spec forbids it).
@@ -112,7 +110,7 @@ Layout notes:
 
 | Mechanism | Verdict | Why |
 |---|---|---|
-| Per-host Home Manager import path (`hosts/<name>/home.nix` sets `home-manager.users.piioni.imports`) | **Adopted** | Zero new concepts; facts reach HM modules without crossing the `specialArgs` boundary at all; `nixd` resolution unchanged |
+| Per-host Home Manager seam (`hosts/<name>/home.nix` sets `home-manager.users.piioni.imports` and `nixie.workstation`) | **Adopted** | Zero new concepts; direct host assignments reach HM modules without crossing the `specialArgs` boundary; `nixd` resolution unchanged |
 | `home-manager.extraSpecialArgs` | Rejected | Allowed by the spec, but makes the fact bundle an *ambient* module argument: consumers receive it by argument name rather than by declared option, and a host that forgets it fails as "undefined variable" instead of "option not defined". The repo has no other ambient argument |
 | `nixosSystem` `specialArgs` | **Not used for the user layer** | Confirmed hard constraint: `specialArgs` reach the NixOS module class only. Facts are consumed inside Home Manager. `specialArgs` keeps exactly its current job — carrying the `homeManager` flake input into `modules/home-manager.nix` |
 | `home-manager.sharedModules` | Rejected | Shares *modules* across users, not *values* across hosts |
@@ -133,12 +131,12 @@ Layout notes:
     useGlobalPkgs = true;
     useUserPackages = true;
     # `users.piioni` is declared per host in hosts/<name>/home.nix, together with that
-    # host's facts file, so the user layer travels through a per-host import path.
+    # host's direct workstation assignment, so the user layer stays host-scoped.
   };
 }
 ```
 
-`hosts/laptop/home.nix` (and the identical `hosts/desktop/home.nix`):
+`hosts/laptop/home.nix` (and `hosts/desktop/home.nix`, with its deliberate WU3a mirror):
 
 ```nix
 { ... }:
@@ -148,15 +146,18 @@ Layout notes:
       ../../home/piioni          # identity + fact schema
       ../../home/piioni/base.nix # role: host-independent portable tooling
       ../../home/piioni/gui.nix  # role: graphical + host-scoped payload
-      ./facts.nix                # this host's facts (declares nixie.workstation)
     ];
+
+    nixie.workstation = {
+      # This host's explicit display, touchpad, brightnessKeys, and batteryUi values.
+    };
   };
 }
 ```
 
-`hosts/<name>/facts.nix` is a **Home Manager** module and is therefore imported by `home.nix`, never by
-`hosts/<name>/default.nix` (which is a NixOS module). The four paths are file-relative, so
-`./facts.nix` resolves inside the host directory.
+Each `hosts/<name>/home.nix` is a **NixOS module** that declares its Home Manager user and assigns that
+host's `nixie.workstation` values directly inside `home-manager.users.piioni`; no separate fact module is
+imported. The three payload imports remain file-relative.
 
 ### 4.3 The fact schema — `home/piioni/workstation.nix`
 
@@ -215,7 +216,7 @@ in
       nixie: this host's display topology is not captured
       (nixie.workstation.display = null). No monitor directives and no workspace pins
       will be emitted; the compositor will auto-detect. Capture with `hyprctl monitors`
-      and fill the host's facts.nix.
+      and fill the host's home.nix workstation assignment.
     '';
   };
 }
@@ -248,7 +249,7 @@ Design points, each chosen deliberately:
 | `brightnessKeys` | bool | `true` | `false` | `hypr.nix` (two binds) |
 | `batteryUi` | bool | `true` | `false` | `caelestia.nix`, `btop.nix` |
 
-The laptop's declaration (excerpt; exact text in `hosts/laptop/facts.nix`):
+The laptop's direct declaration (excerpt from `hosts/laptop/home.nix`):
 
 ```nix
 nixie.workstation = {
@@ -668,9 +669,9 @@ nix run .#formatter.x86_64-linux -- --check $(git ls-files '*.nix')   # plus any
 | **WU0** (prerequisite, no repo change) | none; writes `evidence/pre-change/**` | 0 | none needed | Oracle exists and is reproducible |
 | **WU1** NVIDIA pure move | `modules/hardware/nvidia.nix` (new, 38) ← `hosts/desktop/gpu-nvidia.nix` (deleted), `hosts/desktop/default.nix` (1 line) | ≈5 with `git -M`, ≈78 raw (no rename detection) | Gate for **desktop** | **R4**: `drvPath` identical |
 | **WU2** host seam + laptop host, payload still verbatim | new `hosts/laptop/{default,host,home}.nix`, new `hosts/desktop/home.nix`, `hosts/desktop/default.nix` (+1), `flake.nix` (+9), `modules/home-manager.nix` (−1/+1) | ≈56 | Gate for **both hosts** | **R1–R3 + R7**: laptop-after ≡ desktop-before; flake lists two hosts |
-| **WU3a** plumbing: schema + roles + facts declared | new `home/piioni/{workstation,base,gui}.nix` + `hosts/{laptop,desktop}/facts.nix`; rewritten `home/piioni/default.nix`; `hosts/*/home.nix` (+3 each) | ≈110 | Gate for **both hosts** | **R1–R3**: facts declared but consumed by nothing, so the payload is still byte-identical |
-| **WU3b** hybrid ownership + render the seven files | `home/piioni/hypr.nix` (ownership transition + render), `caelestia.nix`, `btop.nix` | ≈125 | Gate for **both hosts** | **W1–W3**, one-owner/prefix assertion, and no laptop topology warning; desktop still runs on laptop-mirrored facts |
-| **WU4** desktop divergence | `hosts/desktop/facts.nix` (4 values) | ≈8 | Gate for **both hosts** | **R5 + R6**: per-item absence and the topology warning |
+| **WU3a** plumbing: schema + roles + direct facts declared | new `home/piioni/{workstation,base,gui}.nix`; rewritten `home/piioni/default.nix`; `hosts/*/home.nix` (role imports + direct workstation assignments) | ≈110 | Gate for **both hosts** | **R1–R3**: facts declared but consumed by nothing, so the payload is still byte-identical |
+| **WU3b** hybrid ownership + render the seven files | `home/piioni/hypr.nix` (ownership transition + render), `caelestia.nix`, `btop.nix` | ≈125 | Gate for **both hosts** | **W1–W3**, one-owner/prefix assertion, and no laptop topology warning; desktop still runs on laptop-mirrored direct values |
+| **WU4** desktop divergence | `hosts/desktop/home.nix` (4 direct values) | ≈8 | Gate for **both hosts** | **R5 + R6**: per-item absence and the topology warning |
 
 **Budget accounting (honest).** Total ≈ 300 changed lines with rename detection, ≈ 375 without — inside the
 400-line budget for `single-pr`, but the headroom is thin and WU3b is the swing factor. Two consequences,
@@ -719,7 +720,7 @@ files.
 | High | **Oracle lost** by starting the payload work first | WU0 is a prerequisite with its own evidence directory and commit-order rule (§10) |
 | Medium | `nix flake show` / `nixfmt --check` only see tracked files, so a unit can look green while a new file is unformatted | Both are run over the `rsync` copy or after a unit-sized commit (§9.3) |
 | Medium | Desktop divergence read as regression | I1/I2, the oracle direction in §2 and R1 vs R5 |
-| Medium | Required facts make an intermediate state fail evaluation loudly (a host that forgot `facts.nix`) | Deliberate: the failure names the missing option; WU3a adds both hosts' facts in one commit |
+| Medium | Required facts make an intermediate state fail evaluation loudly (a host that omits a direct assignment) | Deliberate: the failure names the missing option; WU3a adds both hosts' assignments in one commit |
 | Medium | The desktop's real topology stays unknown | `null` + warning + auto-detect; filling it is a follow-up with `hyprctl monitors` |
 | Low | Line budget overstated by rename detection | Report both measurements; 3a/3b boundary is the split point |
 | Latent, out of scope | No `nixpkgs.config.allowUnfree` in the tracked tree while the gate stub supplies it | Recorded, not fixed (§9.4) |
@@ -730,7 +731,7 @@ files.
 
 1. Revert work units in reverse order. WU4 and WU3b are the only units that alter payload content; reverting
    them restores the raw files and the recursive `hypr/lua` copy.
-2. WU3a removal restores the 20 unconditional imports and deletes the schema, roles and facts.
+2. WU3a removal restores the 20 unconditional imports and deletes the schema, roles, and direct host assignments.
 3. WU2 removal deletes `hosts/laptop/`, restores `users.piioni = import ../home/piioni`, and drops the
    desktop's `home.nix`; the flake returns to one host.
 4. WU1 rollback moves the NVIDIA module back and restores the import line — verified by `drvPath` equality
@@ -770,7 +771,7 @@ a follow-up, not part of this change.
 - [ ] I1/I2 accepted: the regression witness is `laptop-after ≡ desktop-before`, at the payload layer.
 - [ ] The oracle is the materialised `home-files` tree, captured before the first payload edit.
 - [ ] `modules/home-manager.nix` no longer names the user; each host declares it via its own import path.
-- [ ] Facts are required, live in `hosts/<name>/facts.nix`, and no consumer contains a host name.
+- [ ] Facts are required and assigned directly in `hosts/<name>/home.nix`, and no consumer contains a host name.
 - [ ] The `hypr/lua` recursive copy is gone; eleven targets own the same paths; the prefix assertion is present.
 - [ ] Five of seven files are byte-identical by construction; the two generators are diffed against the oracle.
 - [ ] The guard asymmetry survives as two branches, and `display = null` emits no directives and no pins.

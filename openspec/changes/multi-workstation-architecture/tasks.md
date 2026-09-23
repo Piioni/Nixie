@@ -118,8 +118,8 @@ Recorded here so no later phase over-claims:
 - **WU1 must be independently witnessable** by identical `system.build.toplevel.drvPath`.
 - **WU2 must land with the payload still verbatim.** The seam and the payload rendering are separate
   concerns and must not share a unit.
-- **WU3a and WU3b are separate work units and separate commits**: plumbing first (schema, roles, facts
-  declared but consumed by nothing), then the seven rendered files.
+- **WU3a and WU3b are separate work units and separate commits**: plumbing first (schema, roles, direct
+  host assignments declared but consumed by nothing), then the seven rendered files.
 - **WU4 last**, because it is the only unit that intentionally perturbs the payload content.
 
 ---
@@ -192,30 +192,30 @@ unaffected.
 
 ---
 
-## WU3a — Plumbing: schema, role layers, facts declared (nothing consumed)
+## WU3a — Plumbing: schema, role layers, direct facts declared (nothing consumed)
 
-**Files:** new `home/piioni/workstation.nix`, `home/piioni/base.nix`, `home/piioni/gui.nix`, new
-`hosts/laptop/facts.nix`, `hosts/desktop/facts.nix`; rewritten `home/piioni/default.nix`;
-`hosts/{desktop,laptop}/home.nix` (+3 imports each).
+**Files:** new `home/piioni/workstation.nix`, `home/piioni/base.nix`, `home/piioni/gui.nix`; rewritten
+`home/piioni/default.nix`; `hosts/{desktop,laptop}/home.nix` (role imports plus direct workstation assignments).
 **Depends on:** WU2 (a host must exist to declare facts into).
 **Gate:** G1 for both hosts exit 0; G2/G3 R1–R3 unchanged (facts declared but consumed by nothing, so
 the payload must still be byte-identical); G5.
-**Rollback boundary:** delete the schema, both role files and both `facts.nix`, restore the 20
-unconditional imports in `home/piioni/default.nix`, drop the three extra imports per host. The payload
-files are untouched by this unit.
+**Rollback boundary:** delete the schema and role files, restore the 20 unconditional imports in
+`home/piioni/default.nix`, and drop the direct workstation assignments and role imports per host. The
+payload files are untouched by this unit.
 **Commit boundary:** its own commit. It is the cheapest possible intermediate state (facts declared,
 nothing consumed, witness still exact) and the sanctioned split point if the budget tightens.
-**Intermediate-state note (deliberate, recorded):** throughout WU3a/WU3b `hosts/desktop/facts.nix`
-carries the **laptop-mirrored** values, so WU3b's byte-equality witness covers both hosts. The desktop
-is therefore temporarily dishonest; WU4 replaces those values and removes the mirror comment. Any
-reviewer seeing laptop values in the desktop host file before WU4 is seeing the design, not a mistake.
+**Intermediate-state note (deliberate, recorded):** throughout WU3a/WU3b the direct assignment in
+`hosts/desktop/home.nix` carries the **laptop-mirrored** values, so WU3b's byte-equality witness covers
+both hosts. The desktop is therefore temporarily dishonest; WU4 replaces those values and removes the
+mirror comment. Any reviewer seeing laptop values in the desktop host file before WU4 is seeing the
+design, not a mistake.
 
 - [x] Create `home/piioni/workstation.nix` declaring `options.nixie.workstation` with `display` (`nullOr`, submodule of `outputs` + `pins`), `touchpad`, `brightnessKeys`, `batteryUi` — **all four required, no defaults**; `scale` and the pin fields are `types.str`, `guard` is a two-value enum; the file holds **no facts** and owns the un-captured-topology `warnings` entry. <!-- sdd-owner: implementation -->
-- [x] Create `hosts/laptop/facts.nix` as a Home Manager module declaring the captured topology (`eDP-1` 1920x1080@60 at 0x0 `scale = "1"`; `HDMI-A-1` 1920x1080@120 at 1920x0 `scale = "1"`), the two pin groups (`hdmi`/`monitor-exists`/`1 2 3 4`, then `edp`/`unconditional`/`5 6` — declaration order is output order), and `touchpad`/`brightnessKeys`/`batteryUi` = `true`. <!-- sdd-owner: implementation -->
-- [x] Create `hosts/desktop/facts.nix` with the laptop-mirrored values plus a comment naming WU4 as the owner of the final values. <!-- sdd-owner: implementation -->
+- [x] Assign the captured topology directly in `hosts/laptop/home.nix` (`eDP-1` 1920x1080@60 at 0x0 `scale = "1"`; `HDMI-A-1` 1920x1080@120 at 1920x0 `scale = "1"`), the two pin groups (`hdmi`/`monitor-exists`/`1 2 3 4`, then `edp`/`unconditional`/`5 6` — declaration order is output order), and `touchpad`/`brightnessKeys`/`batteryUi` = `true`. <!-- sdd-owner: implementation -->
+- [x] Assign the laptop-mirrored values directly in `hosts/desktop/home.nix` with a comment naming WU4 as the owner of the final values. <!-- sdd-owner: implementation -->
 - [x] Create `home/piioni/base.nix` (11 imports: `agents`, `fastfetch`, `herdr`, `lazygit`, `moshi`, `nushell`, `packages`, `starship`, `tuxedo`, `yazi`, `zellij`) and `home/piioni/gui.nix` (9 imports: `btop`, `caelestia`, `ghostty`, `hypr`, `kitty`, `swappy`, `swayimg`, `swaync`, `zed`); `btop` sits in `gui` because its config target carries a host fact. <!-- sdd-owner: implementation -->
 - [x] Rewrite `home/piioni/default.nix` to identity only (`home.username`, `home.homeDirectory`, `home.stateVersion = "25.11"` unchanged, `programs.home-manager.enable`) plus `imports = [ ./workstation.nix ]`. <!-- sdd-owner: implementation -->
-- [x] Extend `hosts/desktop/home.nix` and `hosts/laptop/home.nix` imports with `home/piioni/base.nix`, `home/piioni/gui.nix`, `./facts.nix`. The exact relative spelling of those imports is recorded in `design.md` §4.2. <!-- sdd-owner: implementation -->
+- [x] Extend `hosts/desktop/home.nix` and `hosts/laptop/home.nix` imports with `home/piioni/base.nix` and `home/piioni/gui.nix`, and assign each host's `nixie.workstation` values directly in the same attrset. The exact relative spelling of the role imports is recorded in `design.md` §4.2. <!-- sdd-owner: implementation -->
 - [x] Verify the union of `base.nix` + `gui.nix` equals the previous unconditional import list as a **set** (no module added, dropped, or moved out of the profile). <!-- sdd-owner: implementation -->
 - [x] Confirm no consumer reads `config.nixie.workstation` yet and that no file under `home/` contains a host name (`desktop`/`laptop`) or a machine literal. <!-- sdd-owner: implementation -->
 - [x] Run G1 for both hosts (exit 0) and G2/G3 for the laptop: the payload must still be byte-identical to the pre-change oracle, proving the facts are declared but not yet consumed. <!-- sdd-owner: implementation -->
@@ -266,15 +266,15 @@ size checkpoint).
 
 ## WU4 — Desktop divergence
 
-**Files:** `hosts/desktop/facts.nix` only.
-**Depends on:** WU3b (the desktop must already consume facts before it can diverge).
+**Files:** `hosts/desktop/home.nix` only.
+**Depends on:** WU3b (the desktop must already consume direct host assignments before it can diverge).
 **Gate:** G1 for both hosts exit 0; R5 item-by-item divergence check; R6 positive for `desktop` and
 negative for `laptop`; R1 byte equality for the laptop still exact; G5.
-**Rollback boundary:** restore the four laptop-mirrored values in `hosts/desktop/facts.nix`; nothing
+**Rollback boundary:** restore the four laptop-mirrored values in `hosts/desktop/home.nix`; nothing
 else is affected.
 **Commit boundary:** the final unit; it is the only one that intentionally perturbs the payload.
 
-- [ ] Set `hosts/desktop/facts.nix` to `display = null`, `touchpad = false`, `brightnessKeys = false`, `batteryUi = false`, and remove the WU3a mirror comment. <!-- sdd-owner: implementation -->
+- [ ] Set the direct `hosts/desktop/home.nix` assignment to `display = null`, `touchpad = false`, `brightnessKeys = false`, `batteryUi = false`, and remove the WU3a mirror comment. <!-- sdd-owner: implementation -->
 - [ ] Run G1 for `desktop` and confirm exit 0 plus the un-captured-topology warning on stderr (R6 positive); run G1 for `laptop` and confirm no such warning. <!-- sdd-owner: implementation -->
 - [ ] Check R5 item by item against `design.md` §7.5: L1 `eDP-1` monitor block absent, L2 no pin loop with `special:magic` retained, L3 touchpad region removed from `inputs.lua`, L4 `gestures.lua` comment-only, L5 brightness region removed from `keybinds.lua`, L6 `"showBattery": false`, L7 `show_battery = false`; report any drift beyond this table separately rather than absorbing it. <!-- sdd-owner: implementation -->
 - [ ] Re-confirm R1/R2 for `laptop` after WU4, proving the desktop's divergence did not touch the laptop payload. <!-- sdd-owner: implementation -->
