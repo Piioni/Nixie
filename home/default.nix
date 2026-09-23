@@ -2,7 +2,6 @@
 {
   imports = [
     ./core
-    ./tui
     ./gui
   ];
 
