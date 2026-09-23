@@ -22,14 +22,15 @@
     { nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
-      username = "piioni";
+      vars = import ./vars;
+      inherit (vars) username userfullname useremail;
       pkgs = nixpkgs.legacyPackages.${system};
     in
     {
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
-          inherit username;
+          inherit username userfullname useremail;
           helium = inputs.helium;
           homeManager = inputs.home-manager;
           nixvim = inputs.nixvim;
@@ -40,7 +41,7 @@
       nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
-          inherit username;
+          inherit username userfullname useremail;
           helium = inputs.helium;
           homeManager = inputs.home-manager;
           nixvim = inputs.nixvim;

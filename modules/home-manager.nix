@@ -3,6 +3,8 @@
   homeManager,
   nixvim,
   username,
+  userfullname,
+  useremail,
   ...
 }:
 {
@@ -14,7 +16,13 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     extraSpecialArgs = {
-      inherit helium nixvim username;
+      inherit
+        helium
+        nixvim
+        username
+        userfullname
+        useremail
+        ;
     };
     # The Home Manager user is declared per host, in that host's own home.nix,
     # so the user layer travels through a per-host import path instead of being
