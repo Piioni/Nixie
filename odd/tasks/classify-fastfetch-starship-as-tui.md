@@ -8,7 +8,7 @@ Keep terminal-facing user tools together under `home/tui` instead of treating Fa
 
 - [x] Move Fastfetch and Starship modules and their source files from `home/core` to `home/tui`; move fzf package ownership from core into a TUI module.
 - [x] Update category aggregators and live symlink sources without changing generated config destinations or behavior.
-- [x] Verify source resolution, formatting, and Home Manager evaluation; commit the focused classification correction next.
+- [x] Verify source resolution and formatting, then commit the correction as `fdae6ad` (`refactor(home): classify terminal tools as tui`).
 
 ## Verification evidence
 
