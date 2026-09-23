@@ -8,5 +8,5 @@
   };
 
   xdg.configFile."starship.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/starship.toml";
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/core/starship.toml";
 }

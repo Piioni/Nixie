@@ -1,7 +1,6 @@
 { ... }:
 {
   imports = [
-    ./btop.nix
     ./caelestia.nix
     ./ghostty.nix
     ./hypr.nix

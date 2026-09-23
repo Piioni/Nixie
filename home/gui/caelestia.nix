@@ -12,7 +12,7 @@
 
   xdg.configFile = {
     "caelestia/cli.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/caelestia/cli.json";
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/caelestia/cli.json";
 
     "caelestia/shell.json".text =
       lib.replaceStrings

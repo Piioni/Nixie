@@ -1,7 +1,7 @@
 # Tasks — multi-workstation-architecture
 
-Host seam, per-host Home Manager payload facts, reusable NVIDIA module, `base` + `gui` role split.
-Refactor only: the laptop is **not** made installable by this change.
+Host seam, per-host Home Manager payload facts, reusable NVIDIA module, and the current
+`home/{core,tui,gui,hosts}` category layout. Refactor only: the laptop is **not** made installable by this change.
 
 - Change: `multi-workstation-architecture`
 - Store: `openspec` — this artifact is `openspec/changes/multi-workstation-architecture/tasks.md`
@@ -9,11 +9,18 @@ Refactor only: the laptop is **not** made installable by this change.
 - Inputs read: `proposal.md`, `exploration.md`, `design.md`,
   `specs/{host-composition,home-payload,hardware-modules}/spec.md`, `openspec/config.yaml`,
   `flake.nix`, `hosts/desktop/{default,host,gpu-nvidia}.nix`, `modules/home-manager.nix`,
-  `home/piioni/default.nix`, `home/piioni/{hypr,btop,caelestia}.nix`
+  `home/default.nix`, `home/{core,tui,gui}/{workstation,hypr,btop,caelestia}.nix`
 - **Nothing here was executed.** No shell tool exists in this phase. Every gate below is labelled
   unverified and is derived from the recorded gate in `openspec/config.yaml`.
 - Strict TDD is **not applicable** (`strict_tdd: false`): NixOS/Home Manager module evaluation has no
   RED/GREEN cycle. **No RED/GREEN evidence exists or is claimed.**
+
+> **Current-layout note.** Active architecture uses `home/default.nix`, category aggregators under
+> `home/core/`, `home/tui/`, and `home/gui/`, plus direct host assignments in
+> `home/hosts/{desktop,laptop}.nix`. Each `hosts/<name>/home.nix` bridge imports `../../home` and its
+> corresponding host module. The completed WU1–WU3a checklist entries below retain their original flat-path
+> wording as historical apply evidence; they do not describe the current tree. The WU3a desktop mirror and
+> WU4 divergence boundary remain unchanged.
 
 ## Review Workload Forecast
 
@@ -88,7 +95,9 @@ entry expands to the leaf paths under its `source`). Set equality only — **no 
 `nixosConfigurations.desktop` and `nixosConfigurations.laptop`.
 
 **G5 — format gate R7.** `nix run .#formatter.x86_64-linux -- --check $(git ls-files '*.nix')`, plus
-any new `.nix` file explicitly named (untracked files are invisible to `nix flake`/`git ls-files`).
+any new `.nix` file explicitly named (untracked files are invisible to `nix flake`/`git ls-files`). The
+current Home Manager paths are `home/default.nix`, `home/core/*.nix`, `home/tui/*.nix`, `home/gui/*.nix`,
+`home/hosts/*.nix`, and `hosts/{desktop,laptop}/home.nix`.
 
 ## Inherently unverifiable in this environment
 
@@ -225,11 +234,11 @@ design, not a mistake.
 
 ## WU3b — Hybrid ownership and seven host-scoped rendered files
 
-**Files:** `home/piioni/hypr.nix` (atomic Lua ownership transition + rendering),
-`home/piioni/caelestia.nix`, `home/piioni/btop.nix`.
+**Files:** `home/gui/hypr.nix` (atomic Lua ownership transition + rendering),
+`home/gui/caelestia.nix`, `home/tui/btop.nix`.
 **Depends on:** WU3a (schema and facts must exist).
 **Live-dotfile boundary:** direct repository payloads use explicit
-`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/..."` paths.
+`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/<category>/..."` paths.
 `hypr/hyprland.lua`, each `hypr/scripts/*` leaf, `caelestia/cli.json`, and btop themes may already use
 that ownership. `hypr/lua` remains recursively store-backed until this unit; WU3b must delete that owner
 before declaring any leaf. Its six host-independent Lua leaves become direct symlinks, while its five
@@ -246,7 +255,7 @@ on disk, so the raw payload restores itself.
 **Commit boundary:** its own commit, after WU3a. Measure `git diff --stat -M` here (see the mid-apply
 size checkpoint).
 
-- [ ] Rewrite `home/piioni/hypr.nix` atomically: delete the `"hypr/lua"` `recursive = true` owner before adding exactly eleven explicit leaves — six direct out-of-store `.source` leaves (`animations`, `autostart`, `decorations`, `programs`, `settings`, `windowrules`) and five rendered `.text` leaves (`monitors`, `workspaces`, `inputs`, `gestures`, `keybinds`). Retain explicit direct ownership for `hypr/hyprland.lua` and every `hypr/scripts/*` leaf; do not restore a recursive script owner. <!-- sdd-owner: implementation -->
+- [ ] Rewrite `home/gui/hypr.nix` atomically: delete the `"hypr/lua"` `recursive = true` owner before adding exactly eleven explicit leaves — six direct out-of-store `.source` leaves (`animations`, `autostart`, `decorations`, `programs`, `settings`, `windowrules`) and five rendered `.text` leaves (`monitors`, `workspaces`, `inputs`, `gestures`, `keybinds`). Retain explicit direct ownership for `hypr/hyprland.lua` and every `hypr/scripts/*` leaf; do not restore a recursive script owner. <!-- sdd-owner: implementation -->
 - [ ] Add the single-owner prefix assertion to `hypr.nix`: no raw `home.file` target may be a path-prefix of another. <!-- sdd-owner: implementation -->
 - [ ] Implement the `monitors.lua` value generator: one `hl.monitor` block per `display.outputs` entry in declared order, blank-line separation, single trailing newline, `scale` emitted verbatim as the raw Lua literal. <!-- sdd-owner: implementation -->
 - [ ] Implement the `workspaces.lua` value generator: one local binding per pin group, **two distinct branches** selected by the `guard` enum (`monitor-exists` → `if hl.get_monitor(...) ~= nil then … end`; `unconditional` → bare loop), declaration order preserved, `special:magic` always emitted, and **zero locals / zero pins** when `display = null`. <!-- sdd-owner: implementation -->
@@ -254,8 +263,8 @@ size checkpoint).
 - [ ] Generate `hypr/lua/inputs.lua` from the payload file with the touchpad region (lines 17–24, copied from the pre-change file at implementation time) dropped when `touchpad = false`; keep keyboard and mouse settings byte-verbatim. <!-- sdd-owner: implementation -->
 - [ ] Generate `hypr/lua/gestures.lua` from the payload file, reduced to one comment line when `touchpad = false`; the target must stay a loadable Lua chunk because `hyprland.lua` requires it unconditionally. <!-- sdd-owner: implementation -->
 - [ ] Generate `hypr/lua/keybinds.lua` from the payload file with the stale comment and both `XF86MonBrightness*` binds (lines 84–90 region) replaced when `brightnessKeys = false`. <!-- sdd-owner: implementation -->
-- [ ] Keep btop theme leaves as direct out-of-store symlinks and convert only `home/piioni/btop.nix`'s store-backed `btop/btop.conf` target from `.source` to `.text` using the checked splice, flipping `show_battery = true` to `false` (line 243 region) and keeping every other key byte-verbatim. <!-- sdd-owner: implementation -->
-- [ ] Keep `caelestia/cli.json` as a direct out-of-store symlink and extend the existing `lib.replaceStrings` call for store-backed `caelestia/shell.json` with the additive `"showBattery": true` → `false` substitution; do not restructure the file and do not add the splice helper a third time. <!-- sdd-owner: implementation -->
+- [ ] Keep btop theme leaves as direct out-of-store symlinks and convert only `home/tui/btop.nix`'s store-backed `btop/btop.conf` target from `.source` to `.text` using the checked splice, flipping `show_battery = true` to `false` (line 243 region) and keeping every other key byte-verbatim. <!-- sdd-owner: implementation -->
+- [ ] Keep `caelestia/cli.json` as a direct out-of-store symlink and extend the existing `lib.replaceStrings` call in `home/gui/caelestia.nix` for store-backed `caelestia/shell.json` with the additive `"showBattery": true` → `false` substitution; do not restructure the file and do not add the splice helper a third time. <!-- sdd-owner: implementation -->
 - [ ] Verify R1 per file: for the laptop, the materialised `hypr/lua/monitors.lua`, `hypr/lua/workspaces.lua`, `hypr/lua/inputs.lua`, `hypr/lua/gestures.lua`, `hypr/lua/keybinds.lua`, `caelestia/shell.json`, and `btop/btop.conf` are each byte-identical to the WU0 oracle (compare rendered content, not the `.source`/`.text` mechanism). <!-- sdd-owner: implementation -->
 - [ ] Verify R2/R3: the option snapshot shows exactly one raw key removed (`…/hypr/lua`) and exactly eleven added (`…/hypr/lua/<name>.lua`) and nothing else; no target is a path-prefix of another; the eleven `require("lua.*")` targets resolve for both hosts. <!-- sdd-owner: implementation -->
 - [ ] Run G1 for both hosts (exit 0); confirm the laptop emits **no** un-captured-topology warning, while `desktop` still renders the laptop-mirrored facts at this unit. <!-- sdd-owner: implementation -->
@@ -266,15 +275,15 @@ size checkpoint).
 
 ## WU4 — Desktop divergence
 
-**Files:** `hosts/desktop/home.nix` only.
+**Files:** `home/hosts/desktop.nix` only.
 **Depends on:** WU3b (the desktop must already consume direct host assignments before it can diverge).
 **Gate:** G1 for both hosts exit 0; R5 item-by-item divergence check; R6 positive for `desktop` and
 negative for `laptop`; R1 byte equality for the laptop still exact; G5.
-**Rollback boundary:** restore the four laptop-mirrored values in `hosts/desktop/home.nix`; nothing
+**Rollback boundary:** restore the four laptop-mirrored values in `home/hosts/desktop.nix`; nothing
 else is affected.
 **Commit boundary:** the final unit; it is the only one that intentionally perturbs the payload.
 
-- [ ] Set the direct `hosts/desktop/home.nix` assignment to `display = null`, `touchpad = false`, `brightnessKeys = false`, `batteryUi = false`, and remove the WU3a mirror comment. <!-- sdd-owner: implementation -->
+- [ ] Set the direct `home/hosts/desktop.nix` assignment to `display = null`, `touchpad = false`, `brightnessKeys = false`, `batteryUi = false`, and remove the WU3a mirror comment. <!-- sdd-owner: implementation -->
 - [ ] Run G1 for `desktop` and confirm exit 0 plus the un-captured-topology warning on stderr (R6 positive); run G1 for `laptop` and confirm no such warning. <!-- sdd-owner: implementation -->
 - [ ] Check R5 item by item against `design.md` §7.5: L1 `eDP-1` monitor block absent, L2 no pin loop with `special:magic` retained, L3 touchpad region removed from `inputs.lua`, L4 `gestures.lua` comment-only, L5 brightness region removed from `keybinds.lua`, L6 `"showBattery": false`, L7 `show_battery = false`; report any drift beyond this table separately rather than absorbing it. <!-- sdd-owner: implementation -->
 - [ ] Re-confirm R1/R2 for `laptop` after WU4, proving the desktop's divergence did not touch the laptop payload. <!-- sdd-owner: implementation -->
@@ -289,7 +298,7 @@ else is affected.
 - [ ] Run G5 including untracked new `.nix` files and record exit 0. <!-- sdd-owner: implementation -->
 - [ ] Record the R1–R7 evidence set for the change: materialised-tree diff (empty), raw-key delta (one removal, eleven additions), ownership assertion result, `desktop` `drvPath` equality at WU1, divergence table result, warning presence/absence, flake topology, format gate. <!-- sdd-owner: implementation -->
 - [ ] Confirm the shell contract: `xurl` is bash and `write_gate_file` streams unbuffered. <!-- sdd-owner: implementation -->
-- [ ] Audit non-goals: no new package declaration, no `services.tlp`/`power-profiles-daemon`/`upower`, no session entry point, no `hardware-configuration.nix` in `hosts/laptop/`, `brightnessctl` still undeclared with the two relocated brightness binds intact, the `code` → `zed-editor` bind untouched, `tuxedo-rs` still in the shared portable layer and unclassified, no `lib/` directory, no `modules/hardware/default.nix`, no `mkEnableOption`/`mkIf` enable-flag framework, no third-machine schema or fact field. <!-- sdd-owner: implementation -->
+- [ ] Audit non-goals: no new package declaration, no `services.tlp`/`power-profiles-daemon`/`upower`, no session entry point, no `hardware-configuration.nix` in `hosts/laptop/`, `brightnessctl` still undeclared with the two relocated brightness binds intact, the `code` → `zed-editor` bind untouched, `tuxedo-rs` still in the shared `home/tui` category and unclassified, no `lib/` directory, no `modules/hardware/default.nix`, no `mkEnableOption`/`mkIf` enable-flag framework, no third-machine schema or fact field. <!-- sdd-owner: implementation -->
 - [ ] Run `nix eval --raw nixpkgs#tuxedo-rs.meta.description` and record the result (open item O2); if it names TUXEDO vendor hardware control, record reclassification as a follow-up only — do not change the layer split. <!-- sdd-owner: implementation -->
 
 ## Post-apply parent actions
@@ -318,7 +327,7 @@ Grouped separately; none of these is implementation-owned.
 | home-payload · Host-Scoped Payload Rendering | WU3b (R1) |
 | home-payload · Verbatim Regions Outside The Varying Region | WU3b |
 | home-payload · Workspace Pin Semantics Are Preserved Per Output | WU3b |
-| home-payload · Two Role Layers | WU3a |
+| home-payload · Three Category Aggregators | WU3a, home-layout refactor |
 | home-payload · `tuxedo-rs` Remains Portable And Unclassified | WU3a, Final verification |
 | hardware-modules · NVIDIA Support Is A Reusable Module | WU1, WU2 |
 | hardware-modules · The Hardware Extraction Is A Behaviour-Preserving Move | WU1 (R4) |

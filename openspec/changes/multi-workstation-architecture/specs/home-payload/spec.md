@@ -2,17 +2,23 @@
 
 ## Purpose
 
-`home/piioni/` is the portable Home Manager payload shared by every workstation: CLI/TUI tooling, a
-graphical session payload, and raw migrated configuration files kept verbatim. Per-machine facts reach
-it as host data, so the payload itself carries no machine-specific literals while its rendered output
-on the machine the payload was migrated from stays byte-identical to the migrated files.
+`home/` is the portable Home Manager payload shared by every workstation. `home/default.nix` imports
+platform-independent `core`, `tui`, and `gui` category aggregators; `home/hosts/{desktop,laptop}.nix`
+holds direct per-machine Home Manager assignments. The payload itself carries no machine-specific literals
+while its rendered output on the machine the payload was migrated from stays byte-identical to the migrated
+files.
+
+> **Current-layout note.** The historical witness amendment below intentionally retains its earlier
+> `base`/`gui` variant labels. Current architecture is `home/{core,tui,gui,hosts}`: `btop.nix` is in `tui`,
+> and `hosts/<name>/home.nix` bridges NixOS by importing `../../home` plus its matching host module.
 
 ## Requirements
 
 ### Requirement: Live-Dotfile Hybrid Ownership Boundary
 
 Direct repository-owned payload files MUST use explicit
-`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/..."` paths.
+`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/<category>/..."` paths:
+Hyprland and Caelestia source paths are under `home/gui/`, while btop source paths are under `home/tui/`.
 `hypr/hyprland.lua`, every `hypr/scripts/*` leaf, `caelestia/cli.json`, and btop theme leaves are direct
 ownership. Host-dependent or substituted targets remain generated/store-backed: the five fact-dependent
 Hyprland Lua regions, `caelestia/shell.json` (runtime-path substitution and later battery divergence), and
@@ -29,7 +35,7 @@ Hyprland Lua regions, `caelestia/shell.json` (runtime-path substitution and late
 
 - GIVEN the hybrid boundary is established in WU3b
 - WHEN desktop-specific values diverge
-- THEN WU4 changes only the direct host assignment in `hosts/desktop/home.nix` and does not change ownership of direct payload targets
+- THEN WU4 changes only the direct host assignment in `home/hosts/desktop.nix` and does not change ownership of direct payload targets
 
 ### Requirement: Home Manager Target Set Stability
 
@@ -40,7 +46,7 @@ copy MUST be removed before explicit per-file entries are introduced, producing 
 
 #### Scenario: Target names survive replacing the recursive copy
 
-- GIVEN `home/piioni/hypr.nix` owns `hypr/lua/<name>.lua` through a recursive copy of `hypr/lua`
+- GIVEN `home/gui/hypr.nix` owns `hypr/lua/<name>.lua` through a recursive copy of `hypr/lua`
 - WHEN the changed configuration is evaluated
 - THEN the target set still contains one target per Hyprland Lua module with unchanged names and no target path is claimed twice
 
@@ -52,7 +58,7 @@ copy MUST be removed before explicit per-file entries are introduced, producing 
 
 ### Requirement: Unconditional Hyprland Module Requires Keep Resolving
 
-Every `lua.*` module required unconditionally by `home/piioni/hypr/hyprland.lua` MUST remain present as
+Every `lua.*` module required unconditionally by `home/gui/hypr/hyprland.lua` MUST remain present as
 a rendered or verbatim target after the change. Those modules MUST NOT be deleted: a module that
 becomes host-scoped MUST keep its target path so the `require` continues to resolve.
 
@@ -123,16 +129,18 @@ workspace pins at all.
 - WHEN its workspace module is rendered
 - THEN no workspace-to-monitor pin is emitted
 
-### Requirement: Two Role Layers
+### Requirement: Three Category Aggregators
 
-The profile MUST be split into exactly two role layers: a base layer for portable CLI/TUI tooling and a
-graphical layer for the session payload. Importing both layers together MUST be equivalent to the
-profile's previous unconditional module list. The base layer MUST NOT carry machine-specific facts. A
-three-layer split MUST NOT be introduced while no non-graphical machine is defined.
+The profile MUST use exactly three platform-independent category aggregators: `home/core/default.nix` for
+shared identity/schema and common tooling, `home/tui/default.nix` for terminal and text-interface
+applications, and `home/gui/default.nix` for graphical applications and session configuration.
+`home/default.nix` MUST import all three. `btop.nix` MUST remain in `home/tui/`, even though its rendered
+configuration consumes `batteryUi`. Category ownership does not relocate host facts: they remain direct
+assignments in `home/hosts/{desktop,laptop}.nix`.
 
-#### Scenario: Layer composition equals the previous profile
+#### Scenario: Category composition equals the previous profile
 
-- GIVEN both role layers imported together for a host
+- GIVEN all three category aggregators imported by `home/default.nix` for a host
 - WHEN that host's target set and rendered content are compared with the previous profile
 - THEN they are equal
 
@@ -142,11 +150,12 @@ equal"). Whole-tree byte equality of the materialised tree is unreachable for an
 (set-equal expanded target set) plus W2 (the seven host-scoped files byte-identical), never a whole-tree
 comparison.
 
-#### Scenario: The graphical layer is the only host-sensitive layer
+#### Scenario: Host facts remain direct assignments
 
-- GIVEN the two role layers
-- WHEN they are inspected for host-scoped facts
-- THEN every host-scoped fact attaches to the graphical layer and the base layer is host-independent
+- GIVEN the three category aggregators and `home/hosts/{desktop,laptop}.nix`
+- WHEN their source locations are inspected
+- THEN `nixie.workstation` values are direct assignments in the host modules, while the shared category
+  modules remain host-agnostic
 
 ### Requirement: `tuxedo-rs` Remains Portable And Unclassified
 

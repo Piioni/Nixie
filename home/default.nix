@@ -1,7 +1,9 @@
 { ... }:
 {
   imports = [
-    ./workstation.nix
+    ./core
+    ./tui
+    ./gui
   ];
 
   home.username = "piioni";

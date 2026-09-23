@@ -2,8 +2,9 @@
 
 The change lands as a **second host** (`hosts/laptop/`) plus **direct per-host Home Manager assignments**,
 four declared **host facts** (`display`, `touchpad`, `brightnessKeys`, `batteryUi`) consumed by host-agnostic
-payload code, a **pure move** of NVIDIA support into `modules/hardware/nvidia.nix`, and a **two-layer role
-split** (`base` + `gui`). The payload's *rendered* output on the migrated-from machine stays byte-identical;
+payload code, a **pure move** of NVIDIA support into `modules/hardware/nvidia.nix`, and a
+**platform-independent Home Manager category layout** (`core` + `tui` + `gui`). The payload's *rendered*
+output on the migrated-from machine stays byte-identical;
 the desktop deliberately loses the laptop facts and carries an explicit `null` topology that warns instead
 of inventing values.
 
@@ -12,7 +13,7 @@ of inventing values.
 - Phase: design (no tasks, no implementation)
 - Inputs read: `proposal.md`, `specs/{host-composition,home-payload,hardware-modules}/spec.md`,
   `exploration.md`, `openspec/config.yaml`, and the live tree (`flake.nix`, `hosts/desktop/*`, `modules/*`,
-  `home/piioni/*`, `home/piioni/hypr/lua/*`), plus Home Manager's own `modules/files.nix`,
+  `home/{core,tui,gui,hosts}/*`, `home/gui/hypr/lua/*`), plus Home Manager's own `modules/files.nix`,
   `modules/lib/file-type.nix`, `modules/misc/xdg.nix` from the pinned input in `/nix/store`.
 - **Nothing here was executed.** No shell, no eval, no build, no format check. Every command below is
   labelled as unverified and is derived from the recorded gate in `openspec/config.yaml`.
@@ -78,26 +79,30 @@ hosts/
     default.nix                            imports: ../../modules, ./host.nix, ./home.nix,
                                                      ../../modules/hardware/nvidia.nix, optional hardware-config
     host.nix                               networking.hostName = "desktop"; system.stateVersion
-    home.nix                               HM seam: imports payload + roles; assigns desktop host facts
-  laptop/                                  NEW
+    home.nix                               HM bridge: imports ../../home + ../../home/hosts/desktop.nix
+  laptop/
     default.nix                            imports: ../../modules, ./host.nix, ./home.nix, optional hardware-config
     host.nix                               networking.hostName = "laptop"; system.stateVersion = "25.11"
-    home.nix                               HM seam: imports payload + roles; assigns captured host facts
-home/piioni/
-  default.nix                              identity (username, homeDirectory, HM stateVersion) + fact schema
-  workstation.nix                          NEW — host-fact schema and the un-captured-topology warning
-  base.nix                                 NEW — role layer: 11 host-independent modules
-  gui.nix                                  NEW — role layer: 9 graphical / host-scoped modules
-  btop.nix, caelestia.nix, hypr.nix        rewritten to consume host facts (3 consumers)
-  hypr/lua/{monitors,workspaces,inputs,gestures,keybinds}.lua    unchanged on disk; five targets become rendered
-  ... (all other payload files untouched)
+    home.nix                               HM bridge: imports ../../home + ../../home/hosts/laptop.nix
+home/
+  default.nix                              shared identity; imports core, tui, and gui aggregators
+  core/{default,agents,fastfetch,packages,starship,workstation}.nix
+                                           shared schema and common tooling
+  tui/{default,btop,herdr,lazygit,moshi,nushell,tuxedo,yazi,zellij}.nix
+                                           terminal and text-interface payload; btop belongs here
+  gui/{default,caelestia,ghostty,hypr,kitty,swappy,swayimg,swaync,zed}.nix
+                                           graphical session payload
+  hosts/{desktop,laptop}.nix               direct per-host Home Manager option assignments
+  gui/hypr/lua/{monitors,workspaces,inputs,gestures,keybinds}.lua
+                                           unchanged on disk; five targets become rendered
 ```
 
 Layout notes:
 
 - **Direct assignments, not the proposal's working name `session.nix`.** The change has *no* session entry
   point (explicit non-goal), so a file called `session.nix` would name a concept this change deliberately does
-  not introduce. Host facts remain explicit inside each host's `home.nix`; scope unchanged.
+  not introduce. Host facts remain explicit direct assignments in `home/hosts/<name>.nix`; each system host
+  bridge imports that module with `../../home`. Scope is unchanged.
 - **No `modules/hardware/default.nix`.** `modules/default.nix` must keep importing nothing NVIDIA-related, so
   that a host selects NVIDIA only by importing the file explicitly (spec: hardware-modules).
 - **No `lib/`, no inventory helper, no `mkEnableOption` framework** (proposal D1; spec forbids it).
@@ -110,13 +115,13 @@ Layout notes:
 
 | Mechanism | Verdict | Why |
 |---|---|---|
-| Per-host Home Manager seam (`hosts/<name>/home.nix` sets `home-manager.users.piioni.imports` and `nixie.workstation`) | **Adopted** | Zero new concepts; direct host assignments reach HM modules without crossing the `specialArgs` boundary; `nixd` resolution unchanged |
+| Per-host Home Manager seam (`hosts/<name>/home.nix` imports `../../home` and `../../home/hosts/<name>.nix`) | **Adopted** | Zero new concepts; the imported `home/hosts/<name>.nix` keeps direct host assignments in the Home Manager module layer without crossing the `specialArgs` boundary; `nixd` resolution unchanged |
 | `home-manager.extraSpecialArgs` | Rejected | Allowed by the spec, but makes the fact bundle an *ambient* module argument: consumers receive it by argument name rather than by declared option, and a host that forgets it fails as "undefined variable" instead of "option not defined". The repo has no other ambient argument |
 | `nixosSystem` `specialArgs` | **Not used for the user layer** | Confirmed hard constraint: `specialArgs` reach the NixOS module class only. Facts are consumed inside Home Manager. `specialArgs` keeps exactly its current job — carrying the `homeManager` flake input into `modules/home-manager.nix` |
 | `home-manager.sharedModules` | Rejected | Shares *modules* across users, not *values* across hosts |
 | `lib/mkWorkstation.nix` | Rejected (proposal D1) | Exists to solve this one transport problem; AGENTS.md asks for explicit values over abstraction-heavy helpers |
 
-### 4.2 The exact composition that replaces `users.piioni = import ../home/piioni`
+### 4.2 The exact composition for the current Home Manager layout
 
 `modules/home-manager.nix` — the hardcoded user disappears; the system layer no longer decides who exists:
 
@@ -130,36 +135,30 @@ Layout notes:
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    # `users.piioni` is declared per host in hosts/<name>/home.nix, together with that
-    # host's direct workstation assignment, so the user layer stays host-scoped.
+    # `users.piioni` is composed per host in hosts/<name>/home.nix. The bridge imports
+    # the shared home root and that host's direct workstation assignment module.
   };
 }
 ```
 
-`hosts/laptop/home.nix` (and `hosts/desktop/home.nix`, with its deliberate WU3a mirror):
+`hosts/laptop/home.nix` (and `hosts/desktop/home.nix`, with the deliberate WU3a mirror retained in
+`home/hosts/desktop.nix` until WU4):
 
 ```nix
 { ... }:
 {
-  home-manager.users.piioni = {
-    imports = [
-      ../../home/piioni          # identity + fact schema
-      ../../home/piioni/base.nix # role: host-independent portable tooling
-      ../../home/piioni/gui.nix  # role: graphical + host-scoped payload
-    ];
-
-    nixie.workstation = {
-      # This host's explicit display, touchpad, brightnessKeys, and batteryUi values.
-    };
-  };
+  home-manager.users.piioni.imports = [
+    ../../home
+    ../../home/hosts/laptop.nix
+  ];
 }
 ```
 
-Each `hosts/<name>/home.nix` is a **NixOS module** that declares its Home Manager user and assigns that
-host's `nixie.workstation` values directly inside `home-manager.users.piioni`; no separate fact module is
-imported. The three payload imports remain file-relative.
+Each `hosts/<name>/home.nix` is a **NixOS bridge module**. It imports the shared payload root and the
+corresponding `home/hosts/<name>.nix` module. That imported module assigns `nixie.workstation` directly in
+the Home Manager module layer; no ambient argument or host-name conditional is introduced.
 
-### 4.3 The fact schema — `home/piioni/workstation.nix`
+### 4.3 The fact schema — `home/core/workstation.nix`
 
 Declares the vocabulary, holds **no facts**, and owns the un-captured-topology warning. Shape (final text may
 be reformatted by `nixfmt`):
@@ -275,23 +274,27 @@ conditional.
 
 ---
 
-## 5. Role layering: `base` + `gui`
+## 5. Category layout: `core` + `tui` + `gui`
 
-Two layers, imported *together* by every host. Membership is decided by **host sensitivity**, which is what
-the spec's scenarios test, and the split of the previous 20 unconditional imports is:
+The current layout uses three **category aggregators**, all imported by `home/default.nix`. This is a
+platform-independent organization, not a role-selection mechanism: host facts remain direct assignments in
+`home/hosts/<name>.nix` and shared consumers remain host-agnostic.
 
-| Layer | Modules (11 + 9 = 20) | Rule |
+| Category | Modules | Rule |
 |---|---|---|
-| `base.nix` | `agents`, `fastfetch`, `herdr`, `lazygit`, `moshi`, `nushell`, `packages`, `starship`, `tuxedo`, `yazi`, `zellij` | Must stay valid on a machine with no display, no touchpad and no battery; reads no `nixie.workstation` field |
-| `gui.nix` | `btop`, `caelestia`, `ghostty`, `hypr`, `kitty`, `swappy`, `swayimg`, `swaync`, `zed` | Graphical session payload **plus** every module whose rendered target carries a host fact |
+| `core/default.nix` | `agents`, `fastfetch`, `packages`, `starship`, `workstation` | Shared identity/schema and common tooling |
+| `tui/default.nix` | `btop`, `herdr`, `lazygit`, `moshi`, `nushell`, `tuxedo`, `yazi`, `zellij` | Terminal and text-interface applications; `btop` belongs here despite its `batteryUi` rendering |
+| `gui/default.nix` | `caelestia`, `ghostty`, `hypr`, `kitty`, `swappy`, `swayimg`, `swaync`, `zed` | Graphical applications and session configuration |
 
-`home/piioni/default.nix` keeps only identity + schema:
+`home/default.nix` keeps shared identity and imports all three aggregators:
 
 ```nix
 { ... }:
 {
   imports = [
-    ./workstation.nix
+    ./core
+    ./tui
+    ./gui
   ];
 
   home.username = "piioni";
@@ -302,15 +305,9 @@ the spec's scenarios test, and the split of the previous 20 unconditional import
 }
 ```
 
-**Known asymmetry, stated rather than hidden:** `btop` is a TUI tool (which reads like `base`) but its
-`btop.conf` target carries the `batteryUi` fact (which forces it into `gui`). One role layer, not two, wins:
-the spec requires every host-scoped fact to attach to the graphical layer. Rejected alternative: splitting
-`btop`'s package and themes (`base`) from its config target (`gui`) — that fragments the tool-per-file
-convention and doubles the review surface for a naming objection.
-
-Rejected: **three layers**. `tui` becomes a real axis only when a non-graphical machine exists; none is
-defined. Rejected: **importing both roles from `default.nix`** — then role selection stops being visible in
-the host file, and the split buys nothing structurally.
+`btop` stays a TUI module even though `btop.conf` consumes `batteryUi`; category ownership describes the
+application, while direct host assignments remain the sole source of host facts. The category split adds no
+Linux/Darwin branch and no empty aggregator.
 
 ---
 
@@ -327,7 +324,7 @@ the host file, and the split buys nothing structurally.
 | `hypr/lua/{monitors,workspaces,inputs,gestures,keybinds}.lua` | covered only by the recursive owner | five rendered/store-backed `.text` leaf targets |
 
 Direct repository-owned payloads use
-`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/piioni/..."`.
+`config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/<category>/..."`.
 The current recursive `hypr/lua` owner is deliberately retained as the only safe intermediate state: no
 leaf may be added beneath it. WU3b's atomic ownership transition first removes that recursive entry, then
 introduces all eleven explicit leaves and retains the prefix assertion below. `hypr/hyprland.lua` and the
@@ -381,7 +378,7 @@ rendered/verbatim entries are enumerated statically in `hypr.nix` (an enumerated
 
 ### 6.4 Every `require` keeps resolving
 
-`home/piioni/hypr/hyprland.lua` lines 2–12 hold **eleven** `require("lua.*")` calls
+`home/gui/hypr/hyprland.lua` lines 2–12 hold **eleven** `require("lua.*")` calls
 (`monitors, programs, decorations, animations, inputs, settings, gestures, keybinds, windowrules,
 workspaces, autostart`) — the brief said ten; the extra one does not change the design. `lua/keybinds.lua:1`
 adds `require("lua.programs")`. All eleven module targets exist for **both** hosts after the change:
@@ -664,6 +661,11 @@ nix run .#formatter.x86_64-linux -- --check $(git ls-files '*.nix')   # plus any
 
 ## 10. Work units: files, lines, gates
 
+> **Historical apply record.** The WU file paths, `base`/`gui` role names, and rollback wording in this
+> section record the earlier completed work units and are intentionally retained as evidence. They do not
+> describe the current Home Manager layout; use §§3–5 for `home/{core,tui,gui,hosts}` and the host-bridge
+> imports. The WU3a desktop mirror and WU4 divergence boundary remain authoritative.
+
 | WU | Files touched | Est. changed lines | Gate that proves it green | Witness |
 |---|---|---|---|---|
 | **WU0** (prerequisite, no repo change) | none; writes `evidence/pre-change/**` | 0 | none needed | Oracle exists and is reproducible |
@@ -695,6 +697,10 @@ files.
 ---
 
 ## 11. Decision log
+
+> **Historical layout decision.** D-E records the earlier `base`/`gui` decision that was valid for its
+> work unit. The current category layout supersedes only that organization: `btop` is now in `home/tui/`.
+> The direct host-assignment decision and the WU3a/WU4 boundary are unchanged.
 
 | # | Decision | Section | Chief rejected alternative |
 |---|---|---|---|
