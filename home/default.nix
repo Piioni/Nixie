@@ -1,6 +1,7 @@
 { username, ... }:
 {
   imports = [
+    ./agents
     ./core
     ./gui
   ];

@@ -17,7 +17,7 @@ Activate for requests to understand architecture, code, tools, terminology, or u
 - Start from what the user already knows and build one abstraction at a time.
 - Never invent repository behavior. Inspect relevant files before making code-specific claims.
 - Contrast new ideas with the user's known mental model when useful (for example, MVC).
-- Use the smallest useful visual: ASCII tree, call flow, Mermaid, or focused diff. Load `/home/piioni/.pi/agent/skills/show-me/SKILL.md` when visual explanation applies.
+- Use the smallest useful visual: ASCII tree, call flow, Mermaid, or focused diff. Load `../show-me/SKILL.md` when visual explanation applies.
 - Keep one lesson focused. Avoid jargon dumps, exhaustive option lists, and unexplained acronyms.
 - Separate verified facts, interpretation, and analogy.
 - Prefer one concrete repository example over several generic examples.
@@ -46,4 +46,4 @@ Return a concise explanation containing: core idea, visual model, concrete examp
 
 ## References
 
-- `/home/piioni/.pi/agent/skills/show-me/SKILL.md` — visual explanation patterns.
+- `../show-me/SKILL.md` — visual explanation patterns.

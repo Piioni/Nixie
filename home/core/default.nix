@@ -1,7 +1,6 @@
 { ... }:
 {
   imports = [
-    ./agents.nix
     ./packages.nix
     ./workstation.nix
     ./btop.nix

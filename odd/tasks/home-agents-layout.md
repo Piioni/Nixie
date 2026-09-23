@@ -17,8 +17,8 @@ home/
 
 ## Work units
 
-- [x] 1. Merge all modules and supporting data from `home/tui` into `home/core`; update aggregators and live source prefixes; remove the obsolete TUI category. Commit: pending.
-- [ ] 2. Move existing repository-managed agent skills from `home/core/agents*` to sibling `home/agents`; wire the portable skills to existing `~/.config/agents/skills`, Pi's documented `~/.agents/skills`, and Claude Code's existing `~/.claude/skills` locations.
+- [x] 1. Merge all modules and supporting data from `home/tui` into `home/core`; update aggregators and live source prefixes; remove the obsolete TUI category. Commit: `d0b4388`.
+- [x] 2. Move existing repository-managed agent skills from `home/core/agents*` to sibling `home/agents`; preserve the `~/.config/agents/skills` targets, expose skills to Pi through `~/.agents/skills`, and preserve Claude Code's existing local links while adding the missing `show-me` skill.
 - [ ] 3. Verify source resolution, Home Manager evaluation for both hosts, module ownership, and commit the focused refactor.
 
 ## Verification record
@@ -27,6 +27,14 @@ home/
 - Both desktop and laptop Home Manager activation evaluations passed (impure), returning the same generation derivation.
 - All previous TUI modules are imported once from core; `home/tui/` and active `home/tui/` references are gone.
 - Only existing Yazi legacy-default warnings remain.
+
+## Verification record
+
+- Nix formatting and staged diff checks passed.
+- Desktop and laptop Home Manager activation evaluations passed (impure).
+- Six shared skills are managed from `home/agents/skills`; legacy `.config/agents` links remain, Pi discovery uses `~/.agents/skills`, and Claude's existing skill links remain intact with `show-me` added.
+- No settings, credentials, session/history/cache, hook, extension, or generated/synced skill state was imported.
+- Existing Yazi legacy-default warning remains; no other evaluation blockers observed.
 
 ## First-cut scope
 
