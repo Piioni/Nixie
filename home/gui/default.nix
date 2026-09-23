@@ -2,14 +2,19 @@
 {
   imports = [
     noctalia.homeModules.default
+    ./browsers.nix
+    ./desktop-tools.nix
     ./ghostty.nix
-    ./helium.nix
+    ./gtk.nix
     ./hypr.nix
     ./kitty.nix
+    ./media.nix
+    ./misc.nix
     ./niri.nix
     ./noctalia.nix
     ./swappy.nix
     ./swayimg.nix
+    ./xdg-apps.nix
     ./zed.nix
   ];
 }

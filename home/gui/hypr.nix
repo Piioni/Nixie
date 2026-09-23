@@ -1,6 +1,10 @@
 { pkgs, config, ... }:
 {
-  home.packages = [ pkgs.hyprland ];
+  home.packages = [
+    pkgs.hyprland
+    pkgs.hyprpicker
+    pkgs.wf-recorder
+  ];
 
   xdg.configFile = {
     "hypr/hyprland.lua".source =

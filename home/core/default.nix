@@ -14,6 +14,7 @@
     ./nushell.nix
     ./starship.nix
     ./tuxedo.nix
+    ./xdg.nix
     ./yazi.nix
     ./zellij.nix
   ];

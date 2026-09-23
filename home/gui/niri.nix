@@ -1,12 +1,7 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   home.packages = with pkgs; [
-    brightnessctl
-    cliphist
-    grim
     nautilus
-    slurp
-    wl-clipboard
   ];
 
   xdg.configFile."niri/config.kdl".text = ''
@@ -94,7 +89,7 @@
         XDG_SESSION_TYPE "wayland"
     }
 
-    screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+    screenshot-path "${config.xdg.userDirs.pictures}/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
     window-rule {
         match app-id=r#"(code|visual-studio-code|com\.visualstudio\.code)$"#

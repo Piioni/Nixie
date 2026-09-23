@@ -12,8 +12,6 @@
     extraPackages = with pkgs; [
       exiftool
       mediainfo
-      mpv
-      xdg-utils
     ];
 
     settings = {
