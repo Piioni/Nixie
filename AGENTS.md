@@ -12,11 +12,10 @@
 - `hosts/desktop/default.nix`: host composition and optional hardware import.
 - `hosts/desktop/host.nix`: host identity and user declaration.
 - `hosts/desktop/gpu-nvidia.nix`: Nvidia-specific options.
-- `modules/default.nix`: root module entrypoint; imports the desktop composition.
-- `modules/desktop.nix`: composes the shared base layer with the desktop layer.
-- `modules/base/default.nix`: aggregate imports for shared system modules (`fonts`, `locale`,
+- `modules/default.nix`: root module entrypoint; imports shared base modules and Home Manager integration.
+- `modules/base/default.nix`: aggregate imports for shared system modules (`audio`, `fonts`, `locale`,
   `networking`, `nix`, `packages`, `ssh`, and `users`).
-- `modules/desktop/default.nix`: aggregate imports for desktop-only modules (`audio` and `fonts`).
+- `modules/desktop/default.nix`: intentionally empty aggregator retained for later host-level desktop selection.
 - `references/peachy-nixos/`: script-driven advanced example.
 - `references/ryan-nixos/`: highly modular example with `Justfile` and CI workflow.
 
@@ -67,9 +66,8 @@ sudo nixos-rebuild switch --flake .#desktop
 ### Imports and composition
 
 - Keep the root module entrypoint in `modules/default.nix`.
-- Compose the base and desktop layers in `modules/desktop.nix`.
-- Keep shared imports in `modules/base/default.nix` and desktop-only imports in
-  `modules/desktop/default.nix`.
+- Keep shared imports in `modules/base/default.nix`.
+- Retain `modules/desktop/default.nix` as an empty aggregator until a host explicitly selects it.
 - Compose host-specific config in `hosts/desktop/default.nix`.
 - Follow existing optional hardware import pattern:
 

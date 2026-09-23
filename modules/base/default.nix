@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./audio.nix
     ./fonts.nix
     ./locale.nix
     ./networking.nix

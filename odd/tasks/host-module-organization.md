@@ -6,7 +6,7 @@ Grow Nixie's host structure step by step, keeping system composition, hardware, 
 
 ## Approach
 
-Keep the direct `flake.nix -> hosts/<name>/default.nix` wiring. Each host's `default.nix` composes focused sibling modules. Add a sibling module only when there is real configuration to own; do not create empty placeholders.
+Keep the direct `flake.nix -> hosts/<name>/default.nix` wiring. Each host's `default.nix` composes focused sibling modules. Add a sibling module only when there is real configuration to own; do not create empty placeholders. Exception: the user explicitly chose to retain `modules/desktop/default.nix` as an empty aggregator while host selection is deferred.
 
 ## Work units
 
@@ -99,3 +99,42 @@ were removed after their values were moved without change.
 - Preserve the existing `lib.optional (builtins.pathExists ./hardware-configuration.nix)` guard.
 - Do not add `outputs/` or a dynamic host registry.
 - Do not create empty networking, services, or power modules.
+- Do not edit `hosts/` during Work Unit 6; host-level desktop selection remains deferred.
+
+## Work unit 6: shared audio and fonts
+
+- [x] Move shared PipeWire/RTKit configuration into `modules/base/audio.nix`.
+- [x] Consolidate font package installation and fontconfig defaults in `modules/base/fonts.nix`.
+- [x] Update `modules/base/default.nix` to import audio.
+- [x] Make `modules/default.nix` import only shared base and Home Manager integration.
+- [x] Retain `modules/desktop/default.nix` as an intentionally empty aggregator, per the user's choice.
+- [x] Remove the obsolete desktop audio/font module files and the former `modules/desktop.nix` composition file.
+- [x] Update `AGENTS.md` to describe the new module boundaries.
+- [x] Leave every file under `hosts/` untouched.
+
+### Acceptance criteria
+
+- Both NixOS hosts retain shared audio and font package/default-font configuration through `modules/base`.
+- The shared module entrypoint no longer imports the desktop aggregator.
+- The desktop aggregator remains present but imports no modules; later host selection is a separate authorized work unit.
+- Host files and the pre-existing `home/core/packages.nix` change remain untouched and unstaged.
+
+### Verification performed
+
+- Passed: `nix fmt -- --check modules/default.nix modules/base/default.nix modules/base/audio.nix modules/base/fonts.nix modules/desktop/default.nix` (dirty-tree warning only).
+- Passed: `nix flake show` lists `desktop` and `laptop`.
+- Passed: PipeWire and RTKit evaluate to `true` for both desktop and laptop.
+- Passed: both hosts evaluate the same default font families: Maple Mono NF, Noto Sans Mono, Noto Sans, Noto Serif, and Noto Color Emoji.
+- Passed: both hosts evaluate the expected packages: `MapleMono-NF-7.9`, `noto-fonts-lgc-plus-2026.08.01`, and `noto-fonts-color-emoji-2.051`.
+- Passed: `git diff --check`.
+- Passed parent spot-check: desktop PipeWire evaluates to `true`.
+- No repository test runner or TDD configuration was found; normal Nix functional checks were used. No build, activation, or system switch was run.
+- Native risk assessment was unavailable (empty native output); the independent read-only verifier completed the requested checks successfully.
+- No files under `hosts/` changed. Pre-existing Home Manager edits were preserved and not staged. No commit was created.
+- Historical OpenSpec documents still describe the previous module paths; they were left untouched because they are historical artifacts outside this work unit's scope.
+
+### Progress
+
+- Authorized scope: `modules/` plus the module-layout guidance in `AGENTS.md`; no `hosts/` edits.
+- Route: one bounded delegated writer, one independent verifier, and a parent spot-check.
+- Status: complete for the module-only work unit; host-level desktop selection remains deferred.

@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ./desktop.nix
+    ./base
     ./home-manager.nix
   ];
 }
