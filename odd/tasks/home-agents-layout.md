@@ -17,9 +17,9 @@ home/
 
 ## Work units
 
-- [x] 1. Merge all modules and supporting data from `home/tui` into `home/core`; update aggregators and live source prefixes; remove the obsolete TUI category. Commit: `d0b4388`.
-- [x] 2. Move existing repository-managed agent skills from `home/core/agents*` to sibling `home/agents`; preserve the `~/.config/agents/skills` targets, expose skills to Pi through `~/.agents/skills`, and preserve Claude Code's existing local links while adding the missing `show-me` skill.
-- [ ] 3. Verify source resolution, Home Manager evaluation for both hosts, module ownership, and commit the focused refactor.
+- [x] 1. Merge all modules and supporting data from `home/tui` into `home/core`; update aggregators and live source prefixes; remove the obsolete TUI category. Commit: `d0b4388` (`refactor(home): merge tui into core`).
+- [x] 2. Move existing repository-managed agent skills from `home/core/agents*` to sibling `home/agents`; preserve the `~/.config/agents/skills` targets, expose skills to Pi through `~/.agents/skills`, and preserve Claude Code's existing local links while adding the missing `show-me` skill. Commit: `29b1968` (`feat(home): manage shared agent skills`).
+- [x] 3. Verify source resolution, Home Manager evaluation for both hosts, module ownership, and commit the focused refactor.
 
 ## Verification record
 
