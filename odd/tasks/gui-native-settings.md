@@ -1,0 +1,30 @@
+# Migrate GUI app settings to native Home Manager options
+
+## Goal
+
+Use the pinned Home Manager modules to declare Swappy and Kitty settings in Nix where this preserves current behavior. Ghostty already uses its native `programs.ghostty.settings` and remains unchanged.
+
+## Work units
+
+- [ ] Migrate Swappy's eight runtime-supported INI settings into `programs.swappy.settings`; confirm the five existing `key_*` entries are ignored by the pinned app parser, omit those inert entries, then remove the source INI after verifying effective behavior and package ownership.
+- [ ] Migrate Kitty's scalar settings and keybindings into the native Home Manager module; keep the Catppuccin theme and Python utility scripts as files, preserve the Nushell executable path and current integrations, and avoid adding process reload behavior.
+- [ ] Verify both host evaluations and generated config semantics, record evidence, and commit each completed work unit.
+
+## Boundaries
+
+- Do not modify `home/gui/ghostty.nix`; its settings are already native. Verify its effective options do not drift.
+- For Swappy, preserve all eight values consumed by the pinned Swappy parser and Linux-only package behavior; do not enable additional service/integration behavior. The five `key_*` entries are not read by Swappy 1.8.0 and should not be carried as active settings.
+- For Kitty, keep `Catppuccin-Mocha.conf`, `utils/scroll_mark.py`, and `utils/search.py` as managed files.
+- Preserve `kitty` shell path as `${pkgs.nushell}/bin/nu`, `shell_integration = no-cursor`, all current scalar settings, and all keybindings.
+- Do not enable Bash/Fish/Zsh/Git integrations or change Kitty reload/onChange behavior.
+- Do not edit or stage the finished host-module changes under `AGENTS.md`, `modules/`, or `odd/tasks/host-module-organization.md`; do not edit or stage the unrelated `home/core/packages.nix` Git addition.
+- Commit only the completed GUI work-unit paths; leave all other dirty paths untouched.
+- Do not run NixOS activation or system build/test/switch.
+
+## Swappy verification evidence
+
+- `nix fmt -- --check home/gui/swappy.nix` — passed; only the expected dirty Git tree warning (plus an ignored SQLite eval-cache busy warning in one parallel evaluation).
+- `git diff --check -- home/gui/swappy.nix` — passed.
+- Desktop and laptop evaluations using `nix eval --json "path:$PWD#nixosConfigurations.<host>.config.home-manager.users.piioni" --apply 'home: { settings = home.programs.swappy.settings.Default; packagePresent = builtins.elem home.programs.swappy.package home.home.packages; }'` both passed and returned `swappy-1.8.0`, `packagePresent = true`, and the exact eight parser-supported settings: `$HOME/Pictures/Screenshots`, `hypr-%Y%m%d-%H%M%S.png`, `show_panel = false`, `line_size = 5`, `text_size = 20`, `paint_mode = "brush"`, `early_exit = false`, `fill_shape = false`.
+- Upstream Swappy 1.8.0 `src/config.c` (`https://raw.githubusercontent.com/jtheoof/swappy/v1.8.0/src/config.c`) confirms the five `key_*` entries are never read by the app parser. An earlier generic INI parse flagged their inline comments as literal values; source inspection resolved this as inert configuration, and those entries are omitted.
+- The original `home/gui/swappy/config` is staged for deletion after semantic verification. The verifier's first scoped cached-diff check returned a Git path-argument error; a follow-up `git diff --cached --check -- home/gui/swappy.nix odd/tasks/gui-native-settings.md home/gui/swappy/config` passed, and the staged deletion is confirmed by status and `git ls-tree HEAD`.

@@ -1,7 +1,18 @@
-{ config, pkgs, ... }:
+{ ... }:
 {
-  home.packages = [ pkgs.swappy ];
+  programs.swappy = {
+    enable = true;
 
-  xdg.configFile."swappy/config".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/gui/swappy/config";
+    settings.Default = {
+      save_dir = "$HOME/Pictures/Screenshots";
+      save_filename_format = "hypr-%Y%m%d-%H%M%S.png";
+      show_panel = false;
+      line_size = 5;
+      text_size = 20;
+      paint_mode = "brush";
+      early_exit = false;
+      fill_shape = false;
+
+    };
+  };
 }
