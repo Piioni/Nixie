@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./editors
     ./packages.nix
     ./workstation.nix
     ./btop.nix
