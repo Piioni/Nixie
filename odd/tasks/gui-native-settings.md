@@ -21,6 +21,14 @@ Use the pinned Home Manager modules to declare Swappy and Kitty settings in Nix 
 - Commit only the completed GUI work-unit paths; leave all other dirty paths untouched.
 - Do not run NixOS activation or system build/test/switch.
 
+## Kitty verification evidence
+
+- `nix fmt -- --check home/gui/kitty.nix` and `git diff --check -- home/gui/kitty.nix` — passed; formatter printed only the dirty-tree warning.
+- Desktop and laptop impure evaluations via `builtins.getFlake ("path:" + builtins.getEnv "PWD")` passed with identical generated Kitty config. All source scalar settings and six keybindings are present, including explicit `kitty_mod ctrl+shift`; theme include is before generated settings; Nushell path is selected and `shell_integration no-cursor` retained.
+- `shellIntegration.mode = null`, Bash/Fish/Zsh/Git integrations false, `onChange = ""`, and exactly one `kitty-0.48.2` package were confirmed. Theme and both Python utility assets resolve from their managed source files. Ghostty has no diff.
+- Generated differences from the old file are only the Home Manager header, sorted option order, float normalization (`0.93` to `0.930000`), and intended `fish` to Nushell path substitution. The original `home/gui/kitty/kitty.conf` was kept during verification and is now staged for deletion.
+- Initial direct `path:$PWD#...` selector evaluations failed because this Nix CLI treated the path selector as a filesystem path; the corrected impure `builtins.getFlake` evaluations passed for both hosts.
+
 ## Swappy verification evidence
 
 - Work-unit commit: `c73bc0e refactor(gui): declare Swappy settings in Nix`.
