@@ -12,12 +12,14 @@
     { nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
+      username = "piioni";
       pkgs = nixpkgs.legacyPackages.${system};
     in
     {
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
+          inherit username;
           homeManager = inputs.home-manager;
         };
         modules = [ ./hosts/desktop/default.nix ];
@@ -26,6 +28,7 @@
       nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
+          inherit username;
           homeManager = inputs.home-manager;
         };
         modules = [ ./hosts/laptop/default.nix ];

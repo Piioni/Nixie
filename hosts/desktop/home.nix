@@ -1,6 +1,6 @@
-{ ... }:
+{ username, ... }:
 {
-  home-manager.users.piioni.imports = [
+  home-manager.users.${username}.imports = [
     ../../home
     ../../home/hosts/desktop.nix
   ];

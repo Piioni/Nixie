@@ -1,6 +1,6 @@
-{ ... }:
+{ username, ... }:
 {
-  users.users.piioni = {
+  users.users.${username} = {
     isNormalUser = true;
     extraGroups = [
       "wheel"
