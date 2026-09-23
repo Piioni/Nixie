@@ -13,6 +13,11 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
+  inputs.nixvim = {
+    url = "github:nix-community/nixvim/167da56c3ab1e51751a6ae4a997ed66587f9edae";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
   outputs =
     { nixpkgs, ... }@inputs:
     let
@@ -27,6 +32,7 @@
           inherit username;
           helium = inputs.helium;
           homeManager = inputs.home-manager;
+          nixvim = inputs.nixvim;
         };
         modules = [ ./hosts/desktop/default.nix ];
       };
@@ -37,6 +43,7 @@
           inherit username;
           helium = inputs.helium;
           homeManager = inputs.home-manager;
+          nixvim = inputs.nixvim;
         };
         modules = [ ./hosts/laptop/default.nix ];
       };

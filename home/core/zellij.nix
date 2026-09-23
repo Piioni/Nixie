@@ -17,7 +17,7 @@ in
     "zellij/config.kdl".text =
       lib.replaceStrings
         [ "/usr/bin/fish" "/usr/bin/nvim" ]
-        [ "${pkgs.nushell}/bin/nu" "${pkgs.neovim}/bin/nvim" ]
+        [ "${pkgs.nushell}/bin/nu" "${config.programs.nixvim.build.package}/bin/nvim" ]
         (builtins.readFile ./zellij/config.kdl);
 
     "zellij/zjstatus.wasm".source = zjstatus;
