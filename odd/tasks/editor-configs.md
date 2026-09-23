@@ -28,8 +28,7 @@ Nixie previously installed Neovim as a package but had no editor configuration m
 - [ ] **EDITORS-03 — Resolve existing full-system evaluation blockers.** Full NixOS `system.build.toplevel` evaluation reaches pre-existing host assertions for missing root filesystem and GRUB device configuration. This is outside the editor change and remains blocked pending separate authorization to address host configuration.
 - [x] **COMMIT-01 — Commit the earlier Git package addition separately.** Staged and committed only the Git addition hunk from `home/core/packages.nix`, retaining Neovim in this commit. **Commit:** `ef189a0dfadca0e512f41cf283acedcc59261d16` (`feat(core): add Git package`).
 - [x] **COMMIT-02 — Commit Helix configuration as a standalone work unit.** Committed the shared-core import, Helix module, and Helix-only editor aggregator. **Commit:** `68857fecb542a17442f1c87be04d7d49277b4611` (`feat(home): configure Helix editor`).
-- [ ] **COMMIT-03 — Commit the Nixvim/Neovim integration.** Include the Nixvim pin/wiring, Neovim module, aggregator update, removal of the standalone Neovim package, Zellij path update, and feature task document. **Status:** in progress.
-- [ ] **COMMIT-04 — Record final work-unit commit identities.** Update this task document with the observed commit hashes and commit that evidence separately. **Status:** pending.
+- [x] **COMMIT-03 — Commit the Nixvim/Neovim integration.** Committed the Nixvim pin/wiring, Neovim module, aggregator update, standalone Neovim package removal, Zellij path update, and feature task document. **Commit:** `0a4a57290c8f5b1b6efbb23375cea2afb3bc7627` (`feat(home): configure Neovim with Nixvim`).
 
 ## Acceptance criteria
 
@@ -60,8 +59,9 @@ Nixie previously installed Neovim as a package but had no editor configuration m
 - Final parent readback confirmed the editor modules, Nixvim wiring, Zellij path, and preserved editor default. The unrelated working-tree changes remained untouched.
 - `COMMIT-01` created `ef189a0dfadca0e512f41cf283acedcc59261d16` (`feat(core): add Git package`); its staged diff contained only the previously requested Git package addition.
 - `COMMIT-02` created `68857fecb542a17442f1c87be04d7d49277b4611` (`feat(home): configure Helix editor`); its staged diff contained only the core editor import and Helix configuration.
-- The editor aggregator's Nixvim import, Neovim removal, and Nixvim wiring remain unstaged for `COMMIT-03`; unrelated worktree changes remain excluded.
+- `COMMIT-03` created `0a4a57290c8f5b1b6efbb23375cea2afb3bc7627` (`feat(home): configure Neovim with Nixvim`); its staged diff contained the Nixvim wiring, Neovim module, package/Zellij updates, and this feature document.
+- All unrelated worktree changes remain excluded from the three work-unit commits.
 
 ## Next step
 
-Stage and inspect only the Nixvim/Neovim integration and this feature document for `COMMIT-03`, run a staged-diff check, and commit with a Conventional Commit message.
+Commit this task-document update so the repository records all three granular work-unit identities; no further editor source changes are planned.
