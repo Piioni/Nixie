@@ -2,6 +2,8 @@
   helium,
   homeManager,
   nixvim,
+  noctalia,
+  noctaliaProtonvpn,
   username,
   userfullname,
   useremail,
@@ -19,6 +21,8 @@
       inherit
         helium
         nixvim
+        noctalia
+        noctaliaProtonvpn
         username
         userfullname
         useremail

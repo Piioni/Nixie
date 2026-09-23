@@ -1,14 +1,15 @@
-{ ... }:
+{ noctalia, ... }:
 {
   imports = [
-    ./caelestia.nix
+    noctalia.homeModules.default
     ./ghostty.nix
     ./helium.nix
     ./hypr.nix
     ./kitty.nix
+    ./niri.nix
+    ./noctalia.nix
     ./swappy.nix
     ./swayimg.nix
-    ./swaync.nix
     ./zed.nix
   ];
 }

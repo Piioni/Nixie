@@ -18,6 +18,21 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
+  inputs.noctalia = {
+    url = "github:noctalia-dev/noctalia-shell";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  inputs.noctalia-protonvpn = {
+    url = "github:GMkonan/noctalia-protonvpn";
+    flake = false;
+  };
+
+  inputs.noctalia-greeter = {
+    url = "github:noctalia-dev/noctalia-greeter";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
   outputs =
     { nixpkgs, ... }@inputs:
     let
@@ -34,6 +49,9 @@
           helium = inputs.helium;
           homeManager = inputs.home-manager;
           nixvim = inputs.nixvim;
+          noctalia = inputs.noctalia;
+          noctaliaProtonvpn = inputs.noctalia-protonvpn;
+          noctaliaGreeter = inputs.noctalia-greeter;
         };
         modules = [ ./hosts/desktop/default.nix ];
       };
@@ -45,6 +63,9 @@
           helium = inputs.helium;
           homeManager = inputs.home-manager;
           nixvim = inputs.nixvim;
+          noctalia = inputs.noctalia;
+          noctaliaProtonvpn = inputs.noctalia-protonvpn;
+          noctaliaGreeter = inputs.noctalia-greeter;
         };
         modules = [ ./hosts/laptop/default.nix ];
       };

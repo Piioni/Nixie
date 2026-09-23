@@ -28,16 +28,13 @@ end
 hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- Shell binds
-hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("caelestia shell drawers toggle launcher"))
-hl.bind("SUPER + N", hl.dsp.exec_cmd("caelestia shell drawers toggle sidebar"))
-hl.bind("SUPER + C", hl.dsp.exec_cmd("caelestia shell controlCenter open"))
-hl.bind("SUPER + D", hl.dsp.exec_cmd("caelestia shell drawers toggle dashboard"))
-hl.bind("SUPER + ESCAPE", hl.dsp.exec_cmd("caelestia shell drawers toggle session"))
-hl.bind("SUPER + SHIFT + ESCAPE", hl.dsp.exec_cmd("caelestia shell lock lock"))
+-- Noctalia controls for the Hyprland session.
+hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("noctalia msg panel-toggle launcher"))
+hl.bind("SUPER + N", hl.dsp.exec_cmd("noctalia msg panel-toggle notifications"))
+hl.bind("SUPER + C", hl.dsp.exec_cmd("noctalia msg panel-toggle control-center"))
+
+-- Shared utility binds
 hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd(programs.deskScripts .. "/colorpicker.sh"))
-hl.bind("SUPER + SHIFT + V", hl.dsp.exec_cmd("caelestia clipboard"))
-hl.bind("SUPER + SHIFT + period", hl.dsp.exec_cmd("caelestia emoji --picker"))
 
 
 -- Hypr binds
