@@ -3,6 +3,11 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+  inputs.helium = {
+    url = "github:oxcl/nix-flake-helium-browser/31b2af977177d347db89d69fac4fe5c44b852007";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
   inputs.home-manager = {
     url = "github:nix-community/home-manager/master";
     inputs.nixpkgs.follows = "nixpkgs";
@@ -20,6 +25,7 @@
         inherit system;
         specialArgs = {
           inherit username;
+          helium = inputs.helium;
           homeManager = inputs.home-manager;
         };
         modules = [ ./hosts/desktop/default.nix ];
@@ -29,6 +35,7 @@
         inherit system;
         specialArgs = {
           inherit username;
+          helium = inputs.helium;
           homeManager = inputs.home-manager;
         };
         modules = [ ./hosts/laptop/default.nix ];

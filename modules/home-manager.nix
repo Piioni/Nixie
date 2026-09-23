@@ -1,4 +1,9 @@
-{ homeManager, username, ... }:
+{
+  helium,
+  homeManager,
+  username,
+  ...
+}:
 {
   imports = [
     homeManager.nixosModules.home-manager
@@ -8,7 +13,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     extraSpecialArgs = {
-      inherit username;
+      inherit helium username;
     };
     # The Home Manager user is declared per host, in that host's own home.nix,
     # so the user layer travels through a per-host import path instead of being
