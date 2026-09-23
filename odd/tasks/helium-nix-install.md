@@ -7,7 +7,7 @@ Install Helium for both Nixie hosts through the user-approved community Nix flak
 ## Work units
 
 - [x] Add the immutable community flake input and lock it; pass the input into shared Home Manager GUI modules and install its package once for both hosts.
-- [ ] Verify lock provenance, desktop/laptop package inclusion and GUI scope; record evidence and commit the implementation.
+- [x] Verify lock provenance, desktop/laptop package inclusion and GUI scope; record evidence and commit the implementation — `058706f`.
 
 ## Source and trust decision
 
@@ -18,6 +18,8 @@ Install Helium for both Nixie hosts through the user-approved community Nix flak
 - The official Helium Linux project does not list Nix packaging as officially maintained and warns about unlisted packaging.
 
 ## Verification evidence
+
+- Work-unit commit: `058706f feat(gui): install Helium from pinned flake`.
 
 - `nix flake lock --update-input helium` completed; `flake.lock` pins `31b2af977177d347db89d69fac4fe5c44b852007` with NAR hash `sha256-CB/ZmtlGbdqHZV8yBBVb4kjyDBlZkocMDAbJgy/L2QU=` and follows the root nixpkgs input. Lock comparison found no unrelated inputs changed.
 - `nix fmt -- --check flake.nix modules/home-manager.nix home/gui/default.nix home/gui/helium.nix` — passed after formatting `modules/home-manager.nix`.
