@@ -6,11 +6,6 @@
     envFile.source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/core/nushell/env.nu";
   };
 
-  programs.zoxide = {
-    enable = true;
-    enableNushellIntegration = true;
-  };
-
   xdg.configFile = {
     "nushell/autoload/20-interface.nu".source =
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/core/nushell/autoload/20-interface.nu";

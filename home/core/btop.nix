@@ -101,7 +101,5 @@
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/core/btop/themes/catppuccin_macchiato.theme";
     "btop/themes/catppuccin_mocha.theme".source =
       config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/core/btop/themes/catppuccin_mocha.theme";
-    "btop/themes/caelestia.theme".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nix-config/home/core/btop/themes/caelestia.theme";
   };
 }

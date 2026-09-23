@@ -5,7 +5,7 @@
     ./workstation.nix
     ./btop.nix
     ./fastfetch.nix
-    ./fzf.nix
+    ./tui.nix
     ./herdr.nix
     ./lazygit.nix
     ./moshi.nix
