@@ -7,7 +7,7 @@ Use the pinned Home Manager modules to declare Swappy and Kitty settings in Nix 
 ## Work units
 
 - [x] Migrate Swappy's eight runtime-supported INI settings into `programs.swappy.settings`; omit the five inert `key_*` entries and remove the source INI after semantic verification — `c73bc0e`.
-- [ ] Migrate Kitty's scalar settings and keybindings into the native Home Manager module; keep the Catppuccin theme and Python utility scripts as files, preserve the Nushell executable path and current integrations, and avoid adding process reload behavior.
+- [x] Migrate Kitty's scalar settings and keybindings into the native Home Manager module; keep the Catppuccin theme and Python utility scripts as files, preserve the Nushell executable path and current integrations, and avoid adding process reload behavior — `9087878`.
 - [ ] Verify both host evaluations and generated config semantics, record evidence, and commit each completed work unit.
 
 ## Boundaries
@@ -23,6 +23,7 @@ Use the pinned Home Manager modules to declare Swappy and Kitty settings in Nix 
 
 ## Kitty verification evidence
 
+- Work-unit commit: `9087878 refactor(gui): declare Kitty settings in Nix`.
 - `nix fmt -- --check home/gui/kitty.nix` and `git diff --check -- home/gui/kitty.nix` — passed; formatter printed only the dirty-tree warning.
 - Desktop and laptop impure evaluations via `builtins.getFlake ("path:" + builtins.getEnv "PWD")` passed with identical generated Kitty config. All source scalar settings and six keybindings are present, including explicit `kitty_mod ctrl+shift`; theme include is before generated settings; Nushell path is selected and `shell_integration no-cursor` retained.
 - `shellIntegration.mode = null`, Bash/Fish/Zsh/Git integrations false, `onChange = ""`, and exactly one `kitty-0.48.2` package were confirmed. Theme and both Python utility assets resolve from their managed source files. Ghostty has no diff.
