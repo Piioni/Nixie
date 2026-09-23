@@ -6,8 +6,8 @@ Remove redundant app config source files where their settings can be represented
 
 ## Work units
 
-- [x] 1. Migrate Starship settings from `home/core/starship.toml` to Home Manager's `programs.starship.settings`; verify parity and commit pending.
-- [ ] 2. Migrate Fastfetch settings from `home/core/fastfetch/config.jsonc` to Home Manager's native settings; preserve module order and behavior, then commit.
+- [x] 1. Migrate Starship settings from `home/core/starship.toml` to Home Manager's `programs.starship.settings`; verify parity. Commit: `42a7ce2` (`refactor(home): define starship settings in nix`).
+- [x] 2. Migrate Fastfetch settings from `home/core/fastfetch/config.jsonc` to Home Manager's native settings; preserve module order and behavior; commit pending.
 - [ ] 3. Migrate only SwayNC's JSON settings into Nix-generated JSON; preserve manual package installation and do not enable the Home Manager systemd service; retain CSS/icons, then commit.
 - [ ] 4. Migrate btop's explicit settings from `home/core/btop/btop.conf` to Home Manager's native settings; retain theme files/symlinks and commit.
 
@@ -19,6 +19,12 @@ Remove redundant app config source files where their settings can be represented
 - Generated TOML was parsed alongside the original with Python `tomllib`; both dictionaries matched exactly for desktop and laptop.
 - Starship remains enabled with Bash/Fish integrations disabled and Nushell integration enabled.
 - Standalone `starship.toml` source removed after parity passed.
+
+### Fastfetch
+
+- `programs.fastfetch.settings` matched the parsed original JSONC exactly for desktop and laptop, including module array order and JSON value types.
+- Confirmed the pinned Home Manager module writes these settings to `fastfetch/config.jsonc` using its JSON generator and retains the default Fastfetch package.
+- Nix formatter and `git diff --check` passed; the original JSONC file was removed only after parity passed.
 
 ## Boundaries
 
