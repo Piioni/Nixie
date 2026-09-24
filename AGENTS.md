@@ -46,8 +46,8 @@ Use explicit Nix file paths for formatting checks. These recipes reject `referen
 outside the repository, and symlinks:
 
 ```bash
-just fmt ./modules/base/audio.nix
-just check ./modules/base/audio.nix
+just fmt ./modules/core/audio.nix
+just check ./modules/core/audio.nix
 ```
 
 For an intentionally broad, manually invoked pass, `fmt-tracked` formats only tracked project

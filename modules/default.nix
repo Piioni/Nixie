@@ -1,7 +1,8 @@
 { ... }:
 {
   imports = [
-    ./base
+    ./core
+    ./networking
     ./home-manager.nix
     ./stylix.nix
   ];
