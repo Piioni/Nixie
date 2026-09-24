@@ -8,7 +8,8 @@ This beginner-friendly flake defines two NixOS hosts: `desktop` and `laptop`.
 - `hosts/desktop/` and `hosts/laptop/` compose each machine's host, Home Manager, hardware, and
   small host-specific modules.
 - `modules/` contains shared system configuration, including Home Manager integration.
-- `home/` contains shared Home Manager modules; `home/hosts/` adds per-host user configuration.
+- Shared Home Manager modules live in `home/`, and each host's Home Manager-specific values live in
+  `hosts/<host>/home.nix`.
 - `modules/desktop/dual-sessions.nix` enables the Noctalia greeter with selectable Hyprland and
   Niri sessions on both hosts.
 - `references/` is read-only inspiration, not an edit target.
