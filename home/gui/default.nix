@@ -13,6 +13,7 @@
     ./nautilus.nix
     ./niri.nix
     ./noctalia.nix
+    ./stylix.nix
     ./swappy.nix
     ./swayimg.nix
     ./xdg-apps.nix

@@ -96,8 +96,6 @@
       theme = {
         mode = "dark";
         shell_mode = "follow";
-        source = "builtin";
-        builtin = "Catppuccin";
       };
 
       wallpaper.directory = "${./noctalia-assets/wallpapers}";

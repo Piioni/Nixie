@@ -3,6 +3,11 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+  inputs.stylix = {
+    url = "github:nix-community/stylix";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
   inputs.helium = {
     url = "github:oxcl/nix-flake-helium-browser/31b2af977177d347db89d69fac4fe5c44b852007";
     inputs.nixpkgs.follows = "nixpkgs";
@@ -50,6 +55,7 @@
           homeManager = inputs.home-manager;
           nixvim = inputs.nixvim;
           noctalia = inputs.noctalia;
+          stylix = inputs.stylix;
           noctaliaProtonvpn = inputs.noctalia-protonvpn;
           noctaliaGreeter = inputs.noctalia-greeter;
         };
@@ -64,6 +70,7 @@
           homeManager = inputs.home-manager;
           nixvim = inputs.nixvim;
           noctalia = inputs.noctalia;
+          stylix = inputs.stylix;
           noctaliaProtonvpn = inputs.noctalia-protonvpn;
           noctaliaGreeter = inputs.noctalia-greeter;
         };
