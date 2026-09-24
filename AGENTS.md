@@ -10,8 +10,9 @@ This beginner-friendly flake defines two NixOS hosts: `desktop` and `laptop`.
 - `modules/` contains shared system configuration, including Home Manager integration.
 - Shared Home Manager modules live in `home/`, and each host's Home Manager-specific values live in
   `hosts/<host>/home.nix`.
-- `modules/desktop/dual-sessions.nix` enables the Noctalia greeter with selectable Hyprland and
-  Niri sessions on both hosts.
+- `modules/sessions.nix` enables the Noctalia greeter with selectable Hyprland and Niri sessions
+  on both hosts; `modules/xdg.nix` provides shared system XDG portal integration; and
+  `modules/hardware/nvidia.nix` contains hardware-specific NVIDIA configuration.
 - `references/` is read-only inspiration, not an edit target.
 
 Each host's `hardware.nix` optionally imports a generated
@@ -68,11 +69,12 @@ just update-one nixpkgs
 just update-all
 ```
 
-`update-one` accepts only `nixpkgs`, `disko`, `home-manager`, `noctalia`, `noctalia-protonvpn`, or
-`noctalia-greeter`; `update-all` runs `nix flake update`. Neither builds, switches, or commits.
-After either, inspect `git diff flake.lock`, then use `just show-working` and `just hm-build
-desktop` or `just hm-build laptop` for each affected host. `helium` and `nixvim` use commit-pinned
-URLs in `flake.nix`, so a lockfile refresh alone cannot advance them.
+`update-one` accepts only `nixpkgs`, `nix-gaming`, `disko`, `home-manager`, `noctalia`,
+`noctalia-protonvpn`, or `noctalia-greeter`; `update-all` runs `nix flake update`. Neither builds,
+switches, or commits. After either, inspect `git diff flake.lock`, then use `just show-working` and
+`just hm-build desktop` or `just hm-build laptop` for each affected host. `nix-gaming` follows the
+root `nixpkgs` input and no gaming-specific binary cache is configured. `helium` and `nixvim` use
+commit-pinned URLs in `flake.nix`, so a lockfile refresh alone cannot advance them.
 
 `just system-build desktop` or `just system-build laptop` is also non-activating, but it first
 requires that host's generated `hardware-configuration.nix`; it prints a practical failure before

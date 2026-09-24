@@ -2,8 +2,9 @@
 {
   imports = [
     ../../modules
-    ../../modules/desktop/dual-sessions.nix
-    ../../modules/desktop/xdg.nix
+    ../../modules/sessions.nix
+    ../../modules/xdg.nix
+    ../../modules/gaming.nix
     ./host.nix
     ./home.nix
     ./hardware.nix

@@ -8,6 +8,7 @@
     enableFishIntegration = false;
     enableNushellIntegration = true;
     enableZshIntegration = false;
+    shellWrapperName = "yy";
 
     extraPackages = with pkgs; [
       exiftool

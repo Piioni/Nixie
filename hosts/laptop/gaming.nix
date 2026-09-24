@@ -1,0 +1,4 @@
+{ ... }:
+{
+  modules.gaming.enable = false;
+}

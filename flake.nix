@@ -3,6 +3,11 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+  inputs.nix-gaming = {
+    url = "github:fufexan/nix-gaming";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
   inputs.disko = {
     url = "github:nix-community/disko";
     inputs.nixpkgs.follows = "nixpkgs";
@@ -24,7 +29,7 @@
   };
 
   inputs.nixvim = {
-    url = "github:nix-community/nixvim/167da56c3ab1e51751a6ae4a997ed66587f9edae";
+    url = "github:nix-community/nixvim/bcb5f577a36565bda07d7b81346b73cad8618d16";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -59,6 +64,7 @@
           helium = inputs.helium;
           homeManager = inputs.home-manager;
           nixvim = inputs.nixvim;
+          nixGaming = inputs.nix-gaming;
           noctalia = inputs.noctalia;
           stylix = inputs.stylix;
           noctaliaProtonvpn = inputs.noctalia-protonvpn;
@@ -77,6 +83,7 @@
           helium = inputs.helium;
           homeManager = inputs.home-manager;
           nixvim = inputs.nixvim;
+          nixGaming = inputs.nix-gaming;
           noctalia = inputs.noctalia;
           stylix = inputs.stylix;
           noctaliaProtonvpn = inputs.noctalia-protonvpn;
