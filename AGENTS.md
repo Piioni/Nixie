@@ -68,7 +68,7 @@ just update-one nixpkgs
 just update-all
 ```
 
-`update-one` accepts only `nixpkgs`, `home-manager`, `noctalia`, `noctalia-protonvpn`, or
+`update-one` accepts only `nixpkgs`, `disko`, `home-manager`, `noctalia`, `noctalia-protonvpn`, or
 `noctalia-greeter`; `update-all` runs `nix flake update`. Neither builds, switches, or commits.
 After either, inspect `git diff flake.lock`, then use `just show-working` and `just hm-build
 desktop` or `just hm-build laptop` for each affected host. `helium` and `nixvim` use commit-pinned

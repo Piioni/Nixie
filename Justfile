@@ -113,8 +113,8 @@ update-one input:
     set -euo pipefail
     input={{ quote(input) }}
     case "$input" in
-      nixpkgs|home-manager|noctalia|noctalia-protonvpn|noctalia-greeter) ;;
-      *) echo "Floating inputs: nixpkgs, home-manager, noctalia, noctalia-protonvpn, noctalia-greeter" >&2; exit 2 ;;
+      nixpkgs|disko|home-manager|noctalia|noctalia-protonvpn|noctalia-greeter) ;;
+      *) echo "Floating inputs: nixpkgs, disko, home-manager, noctalia, noctalia-protonvpn, noctalia-greeter" >&2; exit 2 ;;
     esac
     nix flake update "$input"
 

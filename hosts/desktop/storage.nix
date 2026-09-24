@@ -1,4 +1,40 @@
 { ... }:
 {
-  # TODO: Confirm the disk layout, filesystem, and encryption requirements for this host.
+  disko.devices = {
+    disk.main = {
+      type = "disk";
+      # Installation MUST override this nonexistent placeholder:
+      # disko-install --flake .#desktop --disk main <device>
+      device = "/dev/REPLACE_WITH_TARGET_DISK";
+      content = {
+        type = "gpt";
+        partitions = {
+          ESP = {
+            size = "1G";
+            type = "EF00";
+            content = {
+              type = "filesystem";
+              format = "vfat";
+              mountpoint = "/boot";
+              mountOptions = [ "umask=0077" ];
+            };
+          };
+          root = {
+            size = "100%";
+            content = {
+              type = "btrfs";
+              extraArgs = [ "-f" ];
+              subvolumes = {
+                "@root".mountpoint = "/";
+                "@swap" = {
+                  mountpoint = "/.swapvol";
+                  swap.swapfile.size = "20G";
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
 }

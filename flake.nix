@@ -3,6 +3,11 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+  inputs.disko = {
+    url = "github:nix-community/disko";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
   inputs.stylix = {
     url = "github:nix-community/stylix";
     inputs.nixpkgs.follows = "nixpkgs";
@@ -59,7 +64,10 @@
           noctaliaProtonvpn = inputs.noctalia-protonvpn;
           noctaliaGreeter = inputs.noctalia-greeter;
         };
-        modules = [ ./hosts/desktop/default.nix ];
+        modules = [
+          inputs.disko.nixosModules.disko
+          ./hosts/desktop/default.nix
+        ];
       };
 
       nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
@@ -74,7 +82,10 @@
           noctaliaProtonvpn = inputs.noctalia-protonvpn;
           noctaliaGreeter = inputs.noctalia-greeter;
         };
-        modules = [ ./hosts/laptop/default.nix ];
+        modules = [
+          inputs.disko.nixosModules.disko
+          ./hosts/laptop/default.nix
+        ];
       };
 
       formatter.${system} = pkgs.nixfmt;
