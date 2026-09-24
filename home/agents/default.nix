@@ -3,6 +3,12 @@ let
   skillsPath = "${config.nixie.home.repositoryRoot}/home/agents/skills";
 in
 {
+  imports = [
+    ./claude-code.nix
+    ./pi-coding-agent.nix
+    ./opencode.nix
+  ];
+
   xdg.configFile = {
     "agents/skill/guided-learning/SKILL.md".source =
       config.lib.file.mkOutOfStoreSymlink "${skillsPath}/guided-learning/SKILL.md";
