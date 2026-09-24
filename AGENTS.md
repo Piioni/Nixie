@@ -1,158 +1,120 @@
 # AGENTS.md
 
-## Purpose and Scope
+## Scope and Layout
 
-- Primary target is the root NixOS config (`flake.nix`, `hosts/`, `modules/`).
-- `references/` contains external examples to learn from, not the default edit target.
-- Prefer minimal, beginner-friendly changes in the main config unless asked otherwise.
+This beginner-friendly flake defines two NixOS hosts: `desktop` and `laptop`.
 
-## Repository Layout
+- `flake.nix` exposes both `nixosConfigurations` and the `nixfmt` formatter.
+- `hosts/desktop/` and `hosts/laptop/` compose each machine's host, Home Manager, hardware, and
+  small host-specific modules.
+- `modules/` contains shared system configuration, including Home Manager integration.
+- `home/` contains shared Home Manager modules; `home/hosts/` adds per-host user configuration.
+- `modules/desktop/dual-sessions.nix` enables the Noctalia greeter with selectable Hyprland and
+  Niri sessions on both hosts.
+- `references/` is read-only inspiration, not an edit target.
 
-- `flake.nix`: root flake entrypoint for `nixosConfigurations.desktop`.
-- `hosts/desktop/default.nix`: host composition and optional hardware import.
-- `hosts/desktop/host.nix`: host identity and user declaration.
-- `hosts/desktop/gpu-nvidia.nix`: Nvidia-specific options.
-- `modules/default.nix`: root module entrypoint; imports shared base modules and Home Manager integration.
-- `modules/base/default.nix`: aggregate imports for shared system modules (`audio`, `fonts`, `locale`,
-  `networking`, `nix`, `packages`, `ssh`, and `users`).
-- `modules/desktop/default.nix`: intentionally empty aggregator retained for later host-level desktop selection.
-- `references/peachy-nixos/`: script-driven advanced example.
-- `references/ryan-nixos/`: highly modular example with `Justfile` and CI workflow.
+Each host's `hardware.nix` optionally imports a generated
+`hosts/<host>/hardware-configuration.nix`. Those generated files are currently absent, so a full
+system build is intentionally unavailable until the relevant hardware configuration is added.
 
-## Build, Lint, and Test Commands
+## Safe Commands
 
-### Main repo commands (root)
-
-- Show flake outputs:
+Use the root `Justfile` to discover and inspect commands:
 
 ```bash
-nix flake show
+just --list
+just --show <recipe>
 ```
 
-- Build config without switching system state:
+The recipes use `path:.` deliberately. A normal Git flake reference such as `.#...` reads the Git
+tracked source and can omit untracked modules; `path:.#...` evaluates the working tree instead.
 
 ```bash
-sudo nixos-rebuild build --flake .#desktop
+just show-working
+just check-desktop
+just check-laptop
+just hm-build desktop
+just hm-build laptop
 ```
 
-- Test activation without making it current (single-host validation):
+`hm-build` builds only the selected host's Home Manager activation package and uses `--no-link`; it
+does not activate a profile. Its `NIXPKGS_ALLOW_UNFREE=1` and `--impure` settings are scoped to that
+recipe because the current Home Manager configuration needs unfree agent packages.
+
+Use explicit Nix file paths for formatting checks. These recipes reject `references/`, paths
+outside the repository, and symlinks:
 
 ```bash
-sudo nixos-rebuild test --flake .#desktop
+just fmt ./modules/base/audio.nix
+just check ./modules/base/audio.nix
 ```
 
-- Apply configuration:
+For an intentionally broad, manually invoked pass, `fmt-tracked` formats only tracked project
+`*.nix` files. It uses a NUL-delimited Git file list, preserves spaces in names, skips
+`references/`, and stops at the first failure. It never runs from `default`, help, or validation.
+`check-tracked` performs the same tracked-only scope without changing files. New untracked Nix
+files are excluded; format them explicitly with `just fmt ./file.nix`.
 
 ```bash
-sudo nixos-rebuild switch --flake .#desktop
+just fmt-tracked
+just check-tracked
 ```
 
-## Code Style Guidelines
+Update lockfile entries only when you deliberately want newer floating inputs:
 
-### Nix file/module shape
-
-- Prefer function-header modules:
-
-```nix
-{ ... }:
-{
-  # options
-}
+```bash
+just update-one nixpkgs
+just update-all
 ```
 
-- Include only the arguments you use (example: `{ pkgs, ... }:` when needed).
-- Keep module responsibilities narrow (one concern per file when possible).
+`update-one` accepts only `nixpkgs`, `home-manager`, `noctalia`, `noctalia-protonvpn`, or
+`noctalia-greeter`; `update-all` runs `nix flake update`. Neither builds, switches, or commits.
+After either, inspect `git diff flake.lock`, then use `just show-working` and `just hm-build
+desktop` or `just hm-build laptop` for each affected host. `helium` and `nixvim` use commit-pinned
+URLs in `flake.nix`, so a lockfile refresh alone cannot advance them.
 
-### Imports and composition
+`just system-build desktop` or `just system-build laptop` is also non-activating, but it first
+requires that host's generated `hardware-configuration.nix`; it prints a practical failure before
+calling Nix when the file is missing.
 
-- Keep the root module entrypoint in `modules/default.nix`.
-- Keep shared imports in `modules/base/default.nix`.
-- Retain `modules/desktop/default.nix` as an empty aggregator until a host explicitly selects it.
-- Compose host-specific config in `hosts/desktop/default.nix`.
-- Follow existing optional hardware import pattern:
+## Validation Order
 
-```nix
-++ lib.optional (builtins.pathExists ./hardware-configuration.nix) ./hardware-configuration.nix;
-```
+For a focused configuration change, use the smallest applicable checks in this order:
 
-### Formatting
+1. `just --list`
+2. `just show-working`
+3. `just check-desktop` or `just check-laptop`
+4. `just hm-build <desktop|laptop>` when Home Manager evaluation needs validation
+5. `just fmt ./path/to/file.nix` and `just check ./path/to/file.nix` for each touched Nix file
+6. `just check-tracked` only when a deliberate tracked-project formatting sweep is warranted
 
-- Use two-space indentation in Nix files.
-- End assignments with semicolons.
-- Prefer multiline lists for readability.
-- Match existing formatter output instead of hand-styling.
-- For prose/json/yaml files, follow Prettier settings in repo.
+Do not add a TDD test by default: use behavior-level TDD only when a project or task configuration
+enables it. There is no dedicated test runner configured here. Report every command run and any
+skipped or failed check. In particular, disclose that missing generated hardware files prevent a
+system build, and that evaluation or a Home Manager build does not validate live hardware or a
+running graphical session.
 
-### Naming conventions
+## Deployment Boundary
 
-- Use kebab-case for file names (`gpu-nvidia.nix`).
-- Keep host names lowercase (`desktop`).
-- Keep directories descriptive (`hosts/desktop`, `modules/base`, `modules/desktop`).
-- Use upstream NixOS option names exactly (`networking.hostName`, `services.openssh.enable`).
+This repository provides no activation recipe. `nixos-rebuild build` only builds a closure;
+`nixos-rebuild test` temporarily activates a configuration until reboot; `nixos-rebuild boot` sets
+the next boot configuration without switching the running system; and `nixos-rebuild switch`
+builds and activates it now. These operations normally require root privileges and can affect the
+running machine, so choose and run them manually only after appropriate validation.
 
-### Types and values
+## Nix Style
 
-- Use canonical Nix primitives (`true/false`, quoted strings, lists, attrsets).
-- Prefer explicit values over abstraction-heavy helper layers in this learning repo.
-- Preserve module readability over clever terseness.
+- Prefer small function-header modules, for example `{ pkgs, ... }:` when `pkgs` is used.
+- Use two-space indentation, semicolon-terminated assignments, and readable multiline lists.
+- Keep shared system behavior in `modules/`, shared user behavior in `home/`, and machine-specific
+  behavior under the relevant `hosts/<host>/` directory.
+- Preserve the optional hardware import pattern in each host's `hardware.nix`.
 
-### Imports and package style
+## Safety
 
-- For packages, match current style:
-
-```nix
-environment.systemPackages = with pkgs; [
-  git
-  vim
-  curl
-  wget
-];
-```
-
-- Keep package lists alphabetized only if the surrounding file is already alphabetized.
-
-### Error handling and safety
-
-- In shell scripts, fail fast and check exit codes explicitly.
-- Do not add silent failure patterns.
-- Do not introduce destructive operations unless explicitly requested.
-- Never commit real credentials or secrets.
-
-### Comments and docs
-
-- Keep comments short and practical.
-- Spanish comments are acceptable and already present; stay consistent per file.
-- Update docs when workflows or commands change.
-
-## Agent Workflow Expectations
-
-- Read nearby files before editing to match local conventions.
-- Prefer small, surgical edits over broad refactors.
-- Validate changes in this order when possible:
-  1. `nix flake show`
-  2. `sudo nixos-rebuild build --flake .#desktop`
-  3. `sudo nixos-rebuild test --flake .#desktop`
-- If a command cannot run in the current environment, state that explicitly in your report.
-
-## Cursor/Copilot Rules
-
-- No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` files were found in this
-  repository tree.
-- If such files are added later, treat them as higher-priority constraints and merge guidance here.
-
-## Known Constraints
-
-- Root repo is intentionally simple and beginner-oriented; avoid over-engineering.
-- `references/` includes advanced patterns that may not fit this repo yet.
-- Keep hardware-sensitive options host-aware (especially GPU and generated hardware config imports).
-- Keep target host as `desktop` unless requested otherwise.
-
-## Quick Checklist for Agents
-
-```text
-1) Inspect flake.nix, hosts/desktop, modules/base, and modules/desktop.
-2) Make minimal, local edits in one host/module area.
-3) Format touched files (nixfmt and/or prettier where relevant).
-4) Run flake show, then rebuild build/test for .#desktop.
-5) Report exactly what changed and what was verified.
-```
+- Read nearby files and make minimal, local changes.
+- Never add secrets or edit generated hardware configuration without an explicit request.
+- Do not use recipes for `sudo`, system switching, test activation, garbage collection, cleaning,
+  or commits; none are provided here. Only the explicitly invoked `update-one` and `update-all`
+  recipes can change `flake.lock`.
+- Keep `references/` and unrelated dirty or untracked files untouched.
