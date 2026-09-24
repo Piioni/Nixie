@@ -10,6 +10,7 @@
     ./kitty.nix
     ./media.nix
     ./misc.nix
+    ./nautilus.nix
     ./niri.nix
     ./noctalia.nix
     ./swappy.nix
