@@ -16,6 +16,8 @@
 
   programs.nixvim = {
     enable = true;
+    # Temporary workaround for the generated docs patch failure.
+    enableMan = false;
 
     clipboard.providers.wl-copy.enable = pkgs.stdenv.hostPlatform.isLinux;
 
