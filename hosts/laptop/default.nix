@@ -7,6 +7,8 @@
     ./host.nix
     ./home.nix
     ./hardware.nix
+    ./boot.nix
+    ./storage.nix
     ./power.nix
   ];
 }
