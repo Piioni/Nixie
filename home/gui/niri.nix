@@ -1,14 +1,10 @@
 {
   config,
+  lib,
   osConfig,
-  pkgs,
   ...
 }:
 {
-  home.packages = with pkgs; [
-    nautilus
-  ];
-
   wayland.windowManager.niri = {
     enable = true;
     package = osConfig.programs.niri.package;
@@ -33,15 +29,15 @@
                   ];
                 };
               }
-              {
-                touchpad = {
-                  _children = [
-                    { tap = { }; }
-                    { natural-scroll = { }; }
-                  ];
-                };
-              }
-            ];
+            ]
+            ++ lib.optional (config.nixie.workstation.touchpad == true) {
+              touchpad = {
+                _children = [
+                  { tap = { }; }
+                  { natural-scroll = { }; }
+                ];
+              };
+            };
           };
         }
         {
@@ -321,24 +317,6 @@
                 "toggle"
               ];
             };
-            "XF86MonBrightnessUp" = {
-              _props.allow-when-locked = true;
-              spawn = [
-                "brightnessctl"
-                "--class=backlight"
-                "set"
-                "+10%"
-              ];
-            };
-            "XF86MonBrightnessDown" = {
-              _props.allow-when-locked = true;
-              spawn = [
-                "brightnessctl"
-                "--class=backlight"
-                "set"
-                "10%-"
-              ];
-            };
 
             # Window management.
             "Mod+O".toggle-overview = { };
@@ -463,6 +441,26 @@
             };
             "Mod+Shift+E".quit = { };
             "Ctrl+Alt+Delete".quit = { };
+          }
+          // lib.optionalAttrs (config.nixie.workstation.brightnessKeys == true) {
+            "XF86MonBrightnessUp" = {
+              _props.allow-when-locked = true;
+              spawn = [
+                "brightnessctl"
+                "--class=backlight"
+                "set"
+                "+10%"
+              ];
+            };
+            "XF86MonBrightnessDown" = {
+              _props.allow-when-locked = true;
+              spawn = [
+                "brightnessctl"
+                "--class=backlight"
+                "set"
+                "10%-"
+              ];
+            };
           };
         }
       ];
