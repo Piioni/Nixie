@@ -2,19 +2,20 @@
 {
   imports = [
     ../../modules
-    ../../modules/sessions.nix
-    ../../modules/xdg.nix
-    ../../modules/gaming.nix
-    ../../modules/zram.nix
-    ./host.nix
     ./home.nix
     ./hardware.nix
     ./boot.nix
     ./storage.nix
     ./power.nix
-    ./peripherals.nix
     ./gaming.nix
   ];
+
+  networking.hostName = "laptop";
+  system.stateVersion = "25.11";
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
 
   modules.zram.enable = true;
 }

@@ -55,21 +55,21 @@
       vars = import ./vars;
       inherit (vars) username userfullname useremail;
       pkgs = nixpkgs.legacyPackages.${system};
+      specialArgs = {
+        inherit username userfullname useremail;
+        helium = inputs.helium;
+        homeManager = inputs.home-manager;
+        nixvim = inputs.nixvim;
+        nixGaming = inputs.nix-gaming;
+        noctalia = inputs.noctalia;
+        stylix = inputs.stylix;
+        noctaliaProtonvpn = inputs.noctalia-protonvpn;
+        noctaliaGreeter = inputs.noctalia-greeter;
+      };
     in
     {
       nixosConfigurations.desktop = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          inherit username userfullname useremail;
-          helium = inputs.helium;
-          homeManager = inputs.home-manager;
-          nixvim = inputs.nixvim;
-          nixGaming = inputs.nix-gaming;
-          noctalia = inputs.noctalia;
-          stylix = inputs.stylix;
-          noctaliaProtonvpn = inputs.noctalia-protonvpn;
-          noctaliaGreeter = inputs.noctalia-greeter;
-        };
+        inherit system specialArgs;
         modules = [
           inputs.disko.nixosModules.disko
           ./hosts/desktop/default.nix
@@ -77,18 +77,7 @@
       };
 
       nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          inherit username userfullname useremail;
-          helium = inputs.helium;
-          homeManager = inputs.home-manager;
-          nixvim = inputs.nixvim;
-          nixGaming = inputs.nix-gaming;
-          noctalia = inputs.noctalia;
-          stylix = inputs.stylix;
-          noctaliaProtonvpn = inputs.noctalia-protonvpn;
-          noctaliaGreeter = inputs.noctalia-greeter;
-        };
+        inherit system specialArgs;
         modules = [
           inputs.disko.nixosModules.disko
           ./hosts/laptop/default.nix
