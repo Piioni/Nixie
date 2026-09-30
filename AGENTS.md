@@ -13,11 +13,39 @@ This beginner-friendly flake defines two NixOS hosts: `desktop` and `laptop`.
 - `modules/sessions.nix` enables SDDM with selectable Hyprland and Niri sessions
   on both hosts; `modules/xdg.nix` provides shared system XDG portal integration; and
   `hosts/desktop/nvidia.nix` contains desktop-specific NVIDIA configuration.
+- `home/gui/hypr/` is the live Hyprland tree: Nix only creates out-of-store links, so editing
+  those files takes effect on reload instead of requiring a rebuild.
 - `references/` is read-only inspiration, not an edit target.
 
 Each host's `hardware.nix` optionally imports a generated
 `hosts/<host>/hardware-configuration.nix`. Those generated files are currently absent, so a full
 system build is intentionally unavailable until the relevant hardware configuration is added.
+
+## Live and Store-Backed Configuration
+
+Home Manager deploys two kinds of file here, and the difference decides how you iterate:
+
+- **Live (out of store).** `nixie.home.repositoryRoot` points at this checkout and the links resolve
+  into the repository itself: the agent skills under `home/agents/skills`, and the whole Hyprland
+  tree in `home/gui/hypr/` (`hyprland.lua`, the `lua/` directory and the `scripts/` directory).
+  Editing those files is enough; reload the application instead of rebuilding. Each host declares
+  that root explicitly in `hosts/<host>/home.nix`.
+- **Store backed.** Nushell, Kitty, Zed, Zellij, Swappy, Swayimg, Niri and Noctalia settings, plus
+  every generated file, are copied into the Nix store. Changing them requires rebuilding and
+  activating the host's Home Manager configuration.
+
+Hyprland is therefore fully live while Niri and Noctalia are fully declarative. Do not reintroduce
+Nix-side generation of Hyprland Lua, and keep machine-specific Hyprland facts in the live tree
+rather than in Nix options: `home/gui/hypr/lua/host.lua` reads `/etc/hostname` and returns the facts
+from `home/gui/hypr/lua/hosts/<hostname>.lua`, whose file declares that machine's monitors,
+workspace pins and capability flags. Shared `inputs.lua` and `keybinds.lua` consume those flags. Add
+a host by adding `lua/hosts/<hostname>.lua`; an unknown hostname warns on stderr and falls back to
+defaults rather than aborting the session. `.luarc.json` declares the `hl` global that Hyprland
+injects so Lua tooling stops flagging it.
+
+Two consequences worth remembering: live files are outside any Nix generation, so rolling back to an
+older generation does not restore their previous content, and a missing or moved checkout breaks
+those links at runtime.
 
 ## Safe Commands
 
