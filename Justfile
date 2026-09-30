@@ -7,13 +7,13 @@ default:
 show-working:
     nix flake show path:.
 
-# Inspect the configured greeter session without building or activating a host.
+# Inspect the selected display manager without building or activating a host.
 check-desktop:
-    nix eval --raw path:.#nixosConfigurations.desktop.config.services.greetd.settings.default_session.command
+    nix eval --raw path:.#nixosConfigurations.desktop.config.services.displayManager.generic.execCmd
 
-# Inspect the configured greeter session without building or activating a host.
+# Inspect the selected display manager without building or activating a host.
 check-laptop:
-    nix eval --raw path:.#nixosConfigurations.laptop.config.services.greetd.settings.default_session.command
+    nix eval --raw path:.#nixosConfigurations.laptop.config.services.displayManager.generic.execCmd
 
 # Build one Home Manager activation package without activating it.
 hm-build host:

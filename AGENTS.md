@@ -10,7 +10,7 @@ This beginner-friendly flake defines two NixOS hosts: `desktop` and `laptop`.
 - `modules/` contains shared system configuration, including Home Manager integration.
 - Shared Home Manager modules live in `home/`, and each host's Home Manager-specific values live in
   `hosts/<host>/home.nix`.
-- `modules/sessions.nix` enables the Noctalia greeter with selectable Hyprland and Niri sessions
+- `modules/sessions.nix` enables SDDM with selectable Hyprland and Niri sessions
   on both hosts; `modules/xdg.nix` provides shared system XDG portal integration; and
   `modules/hardware/nvidia.nix` contains hardware-specific NVIDIA configuration.
 - `references/` is read-only inspiration, not an edit target.
