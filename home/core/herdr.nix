@@ -1,9 +1,145 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 {
-  home.packages = [ pkgs.herdr ];
+  programs.herdr = {
+    enable = true;
+    package = pkgs.herdr;
+    settings = {
+      onboarding = false;
 
-  # Herdr was pointing at the imperative Cargo Nushell; use the declarative one.
-  xdg.configFile."herdr/config.toml".text =
-    lib.replaceStrings [ "@NUSHELL@" ] [ "${pkgs.nushell}/bin/nu" ]
-      (builtins.readFile ./herdr/config.toml);
+      terminal = {
+        # Herdr was pointing at the imperative Cargo Nushell; use the declarative one.
+        default_shell = "${pkgs.nushell}/bin/nu";
+      };
+
+      # Catppuccin Mocha surfaces aligned with the Kitty theme.
+      theme = {
+        name = "catppuccin";
+        custom.surface_dim = "#45475A"; # Surface1
+      };
+
+      ui = {
+        agent_panel_sort = "priority";
+        status_indicators = "dots";
+        show_agent_labels_on_pane_borders = true;
+        sidebar.agents = {
+          row_gap = 0;
+          rows = [
+            [
+              "state_icon"
+              "agent"
+            ]
+            [
+              "workspace"
+              "tab"
+            ]
+          ];
+        };
+        toast.delivery = "herdr";
+      };
+
+      # Direct keybindings modeled after the existing Zellij workflow.
+      # Built-in Ctrl+B bindings remain available as portable fallbacks.
+      keys = {
+        # Workspaces
+        workspace_picker = [
+          "prefix+w"
+          "alt+g"
+        ];
+        new_workspace = [
+          "prefix+shift+n"
+          "alt+shift+w"
+        ];
+        new_worktree = "";
+        open_worktree = [
+          "prefix+shift+g"
+          "alt+shift+g"
+        ];
+        rename_workspace = [
+          "prefix+shift+w"
+          "alt+shift+r"
+        ];
+        close_workspace = [
+          "prefix+shift+d"
+          "alt+shift+x"
+        ];
+        switch_workspace = "alt+shift+1..9";
+
+        # Tabs
+        new_tab = [
+          "prefix+c"
+          "alt+t"
+        ];
+        rename_tab = [
+          "prefix+shift+t"
+          "alt+r"
+        ];
+        close_tab = [
+          "prefix+shift+x"
+          "alt+w"
+        ];
+        switch_tab = [
+          "prefix+1..9"
+          "alt+1..9"
+        ];
+
+        # Panes
+        split_vertical = [
+          "prefix+v"
+          "alt+n"
+        ];
+        split_horizontal = [
+          "prefix+minus"
+          "alt+shift+n"
+        ];
+        focus_pane_left = [
+          "prefix+h"
+          "alt+h"
+        ];
+        focus_pane_down = [
+          "prefix+j"
+          "alt+j"
+        ];
+        focus_pane_up = [
+          "prefix+k"
+          "alt+k"
+        ];
+        focus_pane_right = [
+          "prefix+l"
+          "alt+l"
+        ];
+        swap_pane_left = [
+          "prefix+shift+h"
+          "alt+shift+h"
+        ];
+        swap_pane_down = [
+          "prefix+shift+j"
+          "alt+shift+j"
+        ];
+        swap_pane_up = [
+          "prefix+shift+k"
+          "alt+shift+k"
+        ];
+        swap_pane_right = [
+          "prefix+shift+l"
+          "alt+shift+l"
+        ];
+        rename_pane = [
+          "prefix+shift+p"
+          "alt+shift+p"
+        ];
+        close_pane = [
+          "prefix+x"
+          "alt+x"
+        ];
+        zoom = [
+          "prefix+z"
+          "alt+z"
+        ];
+        edit_scrollback = [
+          "prefix+e"
+          "alt+e"
+        ];
+      };
+    };
+  };
 }
