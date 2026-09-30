@@ -1,5 +1,4 @@
-
--- @GENERATED_WORKSPACE_PINS@
+-- Shared special workspace used by the magic workspace bind.
 hl.workspace_rule({
   workspace = "special:magic",
   gaps_in = 1,
