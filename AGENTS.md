@@ -12,7 +12,7 @@ This beginner-friendly flake defines two NixOS hosts: `desktop` and `laptop`.
   `hosts/<host>/home.nix`.
 - `modules/sessions.nix` enables SDDM with selectable Hyprland and Niri sessions
   on both hosts; `modules/xdg.nix` provides shared system XDG portal integration; and
-  `modules/hardware/nvidia.nix` contains hardware-specific NVIDIA configuration.
+  `hosts/desktop/nvidia.nix` contains desktop-specific NVIDIA configuration.
 - `references/` is read-only inspiration, not an edit target.
 
 Each host's `hardware.nix` optionally imports a generated
