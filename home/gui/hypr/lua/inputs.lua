@@ -14,13 +14,6 @@ hl.config({
         follow_mouse = true,
         float_switch_override_focus = false,
 
-        -- Touchpad
-        touchpad = {
-            -- Tapping is on, but drag lock is off to avoid sticky drags.
-            tap_to_click = true,
-            disable_while_typing = true,
-            natural_scroll = true,
-            clickfinger_behavior = true,
-        },
+        -- @GENERATED_TOUCHPAD_CONFIG@
     },
 })

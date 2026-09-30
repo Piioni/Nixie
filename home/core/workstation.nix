@@ -67,16 +67,16 @@ in
       description = "Captured display topology. `null` means NOT CAPTURED (no directives, no pins, compositor auto-detects).";
     };
     touchpad = mkOption {
-      type = types.bool;
-      description = "This machine has a touchpad.";
+      type = types.nullOr types.bool;
+      description = "Whether this machine has a touchpad; null means unknown and disables touchpad-specific behavior.";
     };
     brightnessKeys = mkOption {
-      type = types.bool;
-      description = "This machine has backlight brightness keys.";
+      type = types.nullOr types.bool;
+      description = "Whether this machine has backlight brightness keys; null means unknown and disables brightness-specific binds.";
     };
     batteryUi = mkOption {
-      type = types.bool;
-      description = "This machine has a battery whose level is shown in the UI.";
+      type = types.nullOr types.bool;
+      description = "Whether this machine has a battery to show in the UI; null means unknown and hides battery-only UI.";
     };
   };
 
