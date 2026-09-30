@@ -1,6 +1,4 @@
 {
-  config,
-  lib,
   noctalia,
   noctaliaProtonvpn,
   pkgs,
@@ -44,7 +42,8 @@
                 "bluetooth"
                 "network"
                 "volume"
-              ] ++ lib.optional (config.nixie.workstation.batteryUi == true) "battery";
+                "battery"
+              ];
               fill = "surface_variant";
               opacity = 1.0;
               padding = 6.0;
@@ -101,10 +100,9 @@
       wallpaper.directory = "${./noctalia-assets/wallpapers}";
 
       widget = {
+        battery.show_label = false;
         network.show_label = false;
         protonvpn.type = "gmkonan/protonvpn:bar";
-      } // lib.optionalAttrs (config.nixie.workstation.batteryUi == true) {
-        battery.show_label = false;
       };
     };
   };

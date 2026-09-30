@@ -5,11 +5,7 @@
       ../../home
     ];
 
-    nixie.workstation = {
-      display = null;
-      touchpad = null;
-      brightnessKeys = null;
-      batteryUi = null;
-    };
+    # Live symlinks point at this checkout on the machine itself.
+    nixie.home.repositoryRoot = "/home/${username}/nix-config";
   };
 }

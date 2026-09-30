@@ -2,7 +2,6 @@
 {
   imports = [
     ./editors
-    ./workstation.nix
     ./btop.nix
     ./fastfetch.nix
     ./git.nix

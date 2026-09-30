@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   osConfig,
   ...
 }:
@@ -29,15 +28,15 @@
                   ];
                 };
               }
-            ]
-            ++ lib.optional (config.nixie.workstation.touchpad == true) {
-              touchpad = {
-                _children = [
-                  { tap = { }; }
-                  { natural-scroll = { }; }
-                ];
-              };
-            };
+              {
+                touchpad = {
+                  _children = [
+                    { tap = { }; }
+                    { natural-scroll = { }; }
+                  ];
+                };
+              }
+            ];
           };
         }
         {
@@ -441,8 +440,6 @@
             };
             "Mod+Shift+E".quit = { };
             "Ctrl+Alt+Delete".quit = { };
-          }
-          // lib.optionalAttrs (config.nixie.workstation.brightnessKeys == true) {
             "XF86MonBrightnessUp" = {
               _props.allow-when-locked = true;
               spawn = [
