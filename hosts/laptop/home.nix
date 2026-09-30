@@ -1,9 +1,11 @@
-{ username, ... }:
+{ pkgs, username, ... }:
 {
   home-manager.users.${username} = {
     imports = [
       ../../home
     ];
+
+    home.packages = [ pkgs.google-chrome ];
 
     nixie.workstation = {
       display = {
