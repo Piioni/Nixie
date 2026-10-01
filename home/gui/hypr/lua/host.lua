@@ -24,7 +24,13 @@ end
 
 local ok, host = pcall(require, "lua.hosts." .. name)
 if not ok then
-  io.stderr:write("nixie: no Hyprland facts at lua/hosts/" .. name .. ".lua; using defaults\n")
+  io.stderr:write(
+    "nixie: could not load Hyprland facts for "
+      .. name
+      .. "; using defaults: "
+      .. tostring(host)
+      .. "\n"
+  )
   return fallback
 end
 
