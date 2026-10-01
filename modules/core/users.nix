@@ -1,4 +1,4 @@
-{ username, ... }:
+{ username, sshAuthorizedKeys, ... }:
 {
   users.users.${username} = {
     isNormalUser = true;
@@ -6,5 +6,6 @@
       "wheel"
       "networkmanager"
     ];
+    openssh.authorizedKeys.keys = sshAuthorizedKeys;
   };
 }

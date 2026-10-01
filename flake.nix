@@ -53,10 +53,20 @@
     let
       system = "x86_64-linux";
       vars = import ./vars;
-      inherit (vars) username userfullname useremail;
+      inherit (vars)
+        username
+        userfullname
+        useremail
+        sshAuthorizedKeys
+        ;
       pkgs = nixpkgs.legacyPackages.${system};
       specialArgs = {
-        inherit username userfullname useremail;
+        inherit
+          username
+          userfullname
+          useremail
+          sshAuthorizedKeys
+          ;
         helium = inputs.helium;
         homeManager = inputs.home-manager;
         nixvim = inputs.nixvim;
