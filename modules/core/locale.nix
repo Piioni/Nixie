@@ -5,5 +5,5 @@
   i18n.extraLocaleSettings = {
     LC_TIME = "es_ES.UTF-8";
   };
-  console.keyMap = "es";
+  console.keyMap = "us";
 }

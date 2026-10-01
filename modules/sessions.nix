@@ -13,6 +13,6 @@
       };
     };
     greetd.enable = false;
-    xserver.xkb.layout = "es";
+    xserver.xkb.layout = "us";
   };
 }

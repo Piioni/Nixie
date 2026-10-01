@@ -23,7 +23,7 @@
               {
                 keyboard = {
                   _children = [
-                    { xkb.layout = "es"; }
+                    { xkb.layout = "us"; }
                     { numlock = { }; }
                   ];
                 };
