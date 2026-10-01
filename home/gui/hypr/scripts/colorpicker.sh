@@ -4,8 +4,8 @@
 #  ┗┛┗┛┗┛┗┛┛┗┣┛┻┗┛┛┗┛┗┛┛┗  
 #                          
 
-# Enhanced Color Picker for Hyprland with History and Waybar Integration
-# Dependencies: hyprpicker, wl-copy, notify-send, jq (for Waybar JSON)
+# Enhanced Color Picker for Hyprland with History
+# Dependencies: hyprpicker, wl-copy, notify-send
 
 # Configuration
 CACHE_DIR="$HOME/.cache/colorpicker"
@@ -41,25 +41,6 @@ list_colors() {
   else
     echo "No colors in history"
   fi
-}
-
-# Generate Waybar JSON output
-waybar_output() {
-  local current_color=$(head -n 1 "$COLORS_FILE" 2>/dev/null || echo "#FFFFFF")
-  local tooltip="<b>   COLOR HISTORY</b>\n\n"
-  tooltip+="→ <b>$current_color</b>  <span color='$current_color'></span>\n"
-
-  if [[ -s "$COLORS_FILE" ]]; then
-    while IFS= read -r color; do
-      [[ "$color" == "$current_color" ]] && continue
-      tooltip+="   <b>$color</b>  <span color='$color'></span>\n"
-    done < <(tail -n +2 "$COLORS_FILE")
-  fi
-
-  jq -n \
-    --arg text "$current_color" \
-    --arg tooltip "$tooltip" \
-    '{text: "", tooltip: $tooltip, alt: $text}'
 }
 
 # Main color picker function
@@ -102,11 +83,6 @@ pick_color() {
   [[ -f "$NOTIFY_ICON" ]] && notify_icon="-i $NOTIFY_ICON"
   notify-send $notify_icon "Color Picker" "Selected: $color"
 
-  # Update Waybar if running
-  if pgrep -x waybar >/dev/null; then
-    pkill -RTMIN+1 waybar
-  fi
-
   echo "$color"
 }
 
@@ -114,9 +90,6 @@ pick_color() {
 case "$1" in
   "-l"|"--list")
     list_colors
-    ;;
-  "-j"|"--json")
-    waybar_output
     ;;
   "-c"|"--current")
     head -n 1 "$COLORS_FILE" 2>/dev/null || echo "#FFFFFF"
