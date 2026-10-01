@@ -5,15 +5,25 @@ default:
 
 # Show outputs from this directory, including untracked work.
 show-working:
-    nix flake show path:.
+    nix flake show --no-write-lock-file path:.
 
-# Inspect the selected display manager without building or activating a host.
+# Inspect only the selected display manager command; this is not a host check or build.
+inspect-login host:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    host={{ quote(host) }}
+    case "$host" in
+      desktop|laptop) ;;
+      *) echo "Supported hosts: desktop, laptop" >&2; exit 2 ;;
+    esac
+    nix eval --no-write-lock-file --raw "path:.#nixosConfigurations.$host.config.services.displayManager.generic.execCmd"
+
+# Compatibility aliases for the limited display-manager inspection.
 check-desktop:
-    nix eval --raw path:.#nixosConfigurations.desktop.config.services.displayManager.generic.execCmd
+    just inspect-login desktop
 
-# Inspect the selected display manager without building or activating a host.
 check-laptop:
-    nix eval --raw path:.#nixosConfigurations.laptop.config.services.displayManager.generic.execCmd
+    just inspect-login laptop
 
 # Build one Home Manager activation package without activating it.
 hm-build host:
@@ -24,8 +34,8 @@ hm-build host:
       desktop|laptop) ;;
       *) echo "Supported hosts: desktop, laptop" >&2; exit 2 ;;
     esac
-    username=$(nix eval --impure --raw --expr '(import ./vars).username')
-    NIXPKGS_ALLOW_UNFREE=1 nix build --impure "path:.#nixosConfigurations.$host.config.home-manager.users.$username.home.activationPackage" --no-link
+    username=$(nix eval --impure --no-write-lock-file --raw --expr '(import ./vars).username')
+    NIXPKGS_ALLOW_UNFREE=1 nix build --impure --no-write-lock-file "path:.#nixosConfigurations.$host.config.home-manager.users.$username.home.activationPackage" --no-link
 
 # Build a system closure only after its generated hardware file exists.
 system-build host:
@@ -41,7 +51,7 @@ system-build host:
       echo "Cannot build $host: generate $hardware first." >&2
       exit 1
     fi
-    nix build "path:.#nixosConfigurations.$host.config.system.build.toplevel" --no-link
+    nix build --no-write-lock-file "path:.#nixosConfigurations.$host.config.system.build.toplevel" --no-link
 
 # Format one explicit Nix source file outside references/.
 fmt file:
@@ -113,8 +123,8 @@ update-one input:
     set -euo pipefail
     input={{ quote(input) }}
     case "$input" in
-      nixpkgs|nix-gaming|disko|home-manager|noctalia|noctalia-protonvpn|noctalia-greeter) ;;
-      *) echo "Floating inputs: nixpkgs, nix-gaming, disko, home-manager, noctalia, noctalia-protonvpn, noctalia-greeter" >&2; exit 2 ;;
+      nixpkgs|nix-gaming|disko|home-manager|noctalia|noctalia-protonvpn) ;;
+      *) echo "Floating inputs: nixpkgs, nix-gaming, disko, home-manager, noctalia, noctalia-protonvpn" >&2; exit 2 ;;
     esac
     nix flake update "$input"
 

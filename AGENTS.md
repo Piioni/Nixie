@@ -40,7 +40,8 @@ rather than in Nix options: `home/gui/hypr/lua/host.lua` reads `/etc/hostname` a
 from `home/gui/hypr/lua/hosts/<hostname>.lua`, whose file declares that machine's monitors,
 workspace pins and capability flags. Shared `inputs.lua` and `keybinds.lua` consume those flags. Add
 a host by adding `lua/hosts/<hostname>.lua`; an unknown hostname warns on stderr and falls back to
-defaults rather than aborting the session. `.luarc.json` declares the `hl` global that Hyprland
+defaults rather than aborting the session; host-module load failures include the original error
+before falling back. `.luarc.json` declares the `hl` global that Hyprland
 injects so Lua tooling stops flagging it.
 
 Two consequences worth remembering: live files are outside any Nix generation, so rolling back to an
@@ -61,11 +62,18 @@ tracked source and can omit untracked modules; `path:.#...` evaluates the workin
 
 ```bash
 just show-working
-just check-desktop
-just check-laptop
+just inspect-login desktop
+just inspect-login laptop
 just hm-build desktop
 just hm-build laptop
 ```
+
+`inspect-login <desktop|laptop>` evaluates only
+`services.displayManager.generic.execCmd`. `check-desktop` and `check-laptop` remain compatibility
+aliases for that limited inspection; none of these commands is a full host check. Existing
+show/build/eval recipes use `--no-write-lock-file` so validation does not refresh the lockfile.
+The pinned NixOS SDDM module's default Wayland compositor (Weston) generates its keymap from the
+system XKB layout, but local evaluation cannot prove the effective layout in a running login greeter.
 
 `hm-build` builds only the selected host's Home Manager activation package and uses `--no-link`; it
 does not activate a profile. Its `NIXPKGS_ALLOW_UNFREE=1` and `--impure` settings are scoped to that
@@ -97,8 +105,8 @@ just update-one nixpkgs
 just update-all
 ```
 
-`update-one` accepts only `nixpkgs`, `nix-gaming`, `disko`, `home-manager`, `noctalia`,
-`noctalia-protonvpn`, or `noctalia-greeter`; `update-all` runs `nix flake update`. Neither builds,
+`update-one` accepts only `nixpkgs`, `nix-gaming`, `disko`, `home-manager`, `noctalia`, or
+`noctalia-protonvpn`; `update-all` runs `nix flake update`. Neither builds,
 switches, or commits. After either, inspect `git diff flake.lock`, then use `just show-working` and
 `just hm-build desktop` or `just hm-build laptop` for each affected host. `nix-gaming` follows the
 root `nixpkgs` input and no gaming-specific binary cache is configured. `helium` and `nixvim` use
@@ -114,7 +122,8 @@ For a focused configuration change, use the smallest applicable checks in this o
 
 1. `just --list`
 2. `just show-working`
-3. `just check-desktop` or `just check-laptop`
+3. `just inspect-login <desktop|laptop>` to inspect only the display-manager command; the
+   `check-desktop` and `check-laptop` aliases preserve compatibility but provide no broader check
 4. `just hm-build <desktop|laptop>` when Home Manager evaluation needs validation
 5. `just fmt ./path/to/file.nix` and `just check ./path/to/file.nix` for each touched Nix file
 6. `just check-tracked` only when a deliberate tracked-project formatting sweep is warranted
@@ -124,6 +133,20 @@ enables it. There is no dedicated test runner configured here. Report every comm
 skipped or failed check. In particular, disclose that missing generated hardware files prevent a
 system build, and that evaluation or a Home Manager build does not validate live hardware or a
 running graphical session.
+
+## Operational checklist
+
+After manual activation, verify these on both machines; local evaluation and builds do not prove
+runtime behavior:
+
+- [ ] US key positions work at console/login and in Hyprland and Niri; live Hyprland links resolve,
+      reload, and select the intended host facts (including laptop outputs).
+- [ ] SSH public keys are provisioned; tailnet peer ACLs permit intended access and deny unintended
+      paths. Do not expose key material while checking.
+- [ ] In LocalSend Settings → Receive, turn off both Quick Save toggles, including Quick Save from
+      Favorites; confirm incoming transfers require approval, including from a favorite sender.
+- [ ] Confirm the running firewall backend and rules match evaluated policy; private source ranges
+      do not establish trusted sender identity.
 
 ## Deployment Boundary
 

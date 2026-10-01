@@ -43,11 +43,6 @@
     flake = false;
   };
 
-  inputs.noctalia-greeter = {
-    url = "github:noctalia-dev/noctalia-greeter";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
-
   outputs =
     { nixpkgs, ... }@inputs:
     let
@@ -74,7 +69,6 @@
         noctalia = inputs.noctalia;
         stylix = inputs.stylix;
         noctaliaProtonvpn = inputs.noctalia-protonvpn;
-        noctaliaGreeter = inputs.noctalia-greeter;
       };
     in
     {
