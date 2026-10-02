@@ -4,6 +4,7 @@
     noctalia.homeModules.default
     ./browsers.nix
     ./desktop-tools.nix
+    ./desktop-apps.nix
     ./ghostty.nix
     ./gtk.nix
     ./hypr.nix
