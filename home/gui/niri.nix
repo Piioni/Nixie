@@ -1,9 +1,20 @@
 {
   config,
   osConfig,
+  pkgs,
   ...
 }:
 {
+  systemd.user.services.polkit-kde-authentication-agent-1 = {
+    Unit = {
+      Description = "KDE Polkit authentication agent for Niri";
+      After = [ "niri.service" ];
+      PartOf = [ "niri.service" ];
+    };
+    Service.ExecStart = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
+    Install.WantedBy = [ "niri.service" ];
+  };
+
   wayland.windowManager.niri = {
     enable = true;
     package = osConfig.programs.niri.package;
@@ -101,7 +112,7 @@
           };
         }
 
-        # Niri starts Noctalia here; Hyprland starts it from its own autostart.
+        # Niri starts Noctalia here.
         # Startup processes.
         {
           spawn-at-startup._args = [

@@ -7,7 +7,6 @@
     ./desktop-apps.nix
     ./ghostty.nix
     ./gtk.nix
-    ./hypr.nix
     ./kitty.nix
     ./media.nix
     ./misc.nix

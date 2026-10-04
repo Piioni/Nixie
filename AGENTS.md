@@ -10,11 +10,12 @@ This beginner-friendly flake defines two NixOS hosts: `desktop` and `laptop`.
 - `modules/` contains shared system configuration, including Home Manager integration.
 - Shared Home Manager modules live in `home/`, and each host's Home Manager-specific values live in
   `hosts/<host>/home.nix`.
-- `modules/sessions.nix` enables SDDM with selectable Hyprland and Niri sessions
-  on both hosts; `modules/xdg.nix` provides shared system XDG portal integration; and
-  `hosts/desktop/nvidia.nix` contains desktop-specific NVIDIA configuration.
-- `home/gui/hypr/` is the live Hyprland tree: Nix only creates out-of-store links, so editing
-  those files takes effect on reload instead of requiring a rebuild.
+- `modules/sessions.nix` enables SDDM and the Niri session on both hosts; `modules/xdg.nix`
+  provides shared system XDG portal integration; and `hosts/desktop/nvidia.nix` contains
+  desktop-specific NVIDIA configuration.
+- Niri is the default desktop session; desktop also retains its Steam/Gamescope gaming session.
+  The original Hyprland files are preserved as an inactive archive under `unused/hyprland/`;
+  restoring them requires explicit rewiring.
 - `references/` is read-only inspiration, not an edit target.
 
 Each host's `hardware.nix` optionally imports a generated
@@ -25,28 +26,16 @@ system build is intentionally unavailable until the relevant hardware configurat
 
 Home Manager deploys two kinds of file here, and the difference decides how you iterate:
 
-- **Live (out of store).** `nixie.home.repositoryRoot` points at this checkout and the links resolve
-  into the repository itself: the agent skills under `home/agents/skills`, and the whole Hyprland
-  tree in `home/gui/hypr/` (`hyprland.lua`, the `lua/` directory and the `scripts/` directory).
-  Editing those files is enough; reload the application instead of rebuilding. Each host declares
-  that root explicitly in `hosts/<host>/home.nix`.
+- **Live (out of store).** `nixie.home.repositoryRoot` points at this checkout and the agent skills
+  under `home/agents/skills` resolve into the repository. Each host declares that root explicitly
+  in `hosts/<host>/home.nix`.
 - **Store backed.** Nushell, Kitty, Zed, Zellij, Swappy, Swayimg, Niri and Noctalia settings, plus
   every generated file, are copied into the Nix store. Changing them requires rebuilding and
   activating the host's Home Manager configuration.
 
-Hyprland is therefore fully live while Niri and Noctalia are fully declarative. Do not reintroduce
-Nix-side generation of Hyprland Lua, and keep machine-specific Hyprland facts in the live tree
-rather than in Nix options: `home/gui/hypr/lua/host.lua` reads `/etc/hostname` and returns the facts
-from `home/gui/hypr/lua/hosts/<hostname>.lua`, whose file declares that machine's monitors,
-workspace pins and capability flags. Shared `inputs.lua` and `keybinds.lua` consume those flags. Add
-a host by adding `lua/hosts/<hostname>.lua`; an unknown hostname warns on stderr and falls back to
-defaults rather than aborting the session; host-module load failures include the original error
-before falling back. `.luarc.json` declares the `hl` global that Hyprland
-injects so Lua tooling stops flagging it.
-
-Two consequences worth remembering: live files are outside any Nix generation, so rolling back to an
-older generation does not restore their previous content, and a missing or moved checkout breaks
-those links at runtime.
+Niri and Noctalia are declarative. The Hyprland archive is not linked or imported; do not reactivate
+it without an explicit decision and deliberate rewiring. `.luarc.json` was archived with the
+original files because its `hl` global declaration was specific to Hyprland.
 
 ## Safe Commands
 
@@ -139,12 +128,13 @@ running graphical session.
 After manual activation, verify these on both machines; local evaluation and builds do not prove
 runtime behavior:
 
-- [ ] US key positions work at console/login and in Hyprland and Niri; live Hyprland links resolve,
-      reload, and select the intended host facts (including laptop outputs).
+- [ ] US key positions work at console/login and in Niri; SDDM unlocks the GNOME Keyring, and Niri
+      starts exactly one graphical Polkit agent with working authentication dialogs.
 - [ ] SSH public keys are provisioned; tailnet peer ACLs permit intended access and deny unintended
       paths. Do not expose key material while checking.
 - [ ] In LocalSend Settings → Receive, turn off both Quick Save toggles, including Quick Save from
       Favorites; confirm incoming transfers require approval, including from a favorite sender.
+- [ ] Confirm screen sharing and portal-dependent features work in the Niri session.
 - [ ] Confirm the running firewall backend and rules match evaluated policy; private source ranges
       do not establish trusted sender identity.
 

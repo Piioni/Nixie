@@ -1,9 +1,8 @@
 { ... }:
 {
-  programs = {
-    hyprland.enable = true;
-    niri.enable = true;
-  };
+  programs.niri.enable = true;
+
+  security.pam.services.sddm.enableGnomeKeyring = true;
 
   services = {
     displayManager = {

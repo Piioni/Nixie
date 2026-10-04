@@ -4,10 +4,10 @@
   ...
 }:
 {
-  # Base NVIDIA para Wayland/Hyprland.
+  # Base NVIDIA para Wayland/Niri.
   services.xserver.videoDrivers = [ "nvidia" ];
 
-  # Recomendado para compositor Wayland en NVIDIA.
+  # Recomendado para sesiones Wayland en NVIDIA.
   boot.kernelParams = [
     "nvidia-drm.modeset=1"
     "nvidia-drm.fbdev=1"

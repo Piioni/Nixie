@@ -1,12 +1,8 @@
 # System-level XDG integration for the graphical sessions.
 #
-# The portal backends are declared by the nixpkgs compositor modules, not here:
-# `programs.hyprland` enables xdg-desktop-portal-hyprland, `programs.niri` adds
-# xdg-desktop-portal-gnome, and both import nixos/modules/programs/wayland/
-# wayland-session.nix, which adds xdg-desktop-portal-gtk. Hyprland's own
-# hyprland-portals.conf is `default=hyprland;gtk`, so FileChooser and OpenURI
-# resolve to the GTK portal. Nothing here overrides xdg.portal.config or
-# xdg.portal.extraPortals.
+# Portal backends are declared by the nixpkgs Niri module (GNOME) and the
+# shared Wayland session module (GTK). This module keeps portal opening enabled
+# without overriding xdg.portal.config or xdg.portal.extraPortals.
 { lib, ... }:
 {
   xdg.portal = {
