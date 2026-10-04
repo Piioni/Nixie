@@ -53,6 +53,7 @@
         userfullname
         useremail
         sshAuthorizedKeys
+        initialHashedPassword
         ;
       pkgs = nixpkgs.legacyPackages.${system};
       specialArgs = {
@@ -61,6 +62,7 @@
           userfullname
           useremail
           sshAuthorizedKeys
+          initialHashedPassword
           ;
         helium = inputs.helium;
         homeManager = inputs.home-manager;

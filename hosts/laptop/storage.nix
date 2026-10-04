@@ -16,9 +16,8 @@
   disko.devices = {
     disk.main = {
       type = "disk";
-      # Installation MUST override this nonexistent placeholder:
-      # disko-install --flake .#laptop --disk main <device>
-      device = "/dev/REPLACE_WITH_TARGET_DISK";
+      # Stable ID of the laptop's internal NVMe; disko wipes exactly this disk.
+      device = "/dev/disk/by-id/nvme-SKHynix_HFM256GD3HX015N_FNB1N546212501H4L";
       content = {
         type = "gpt";
         partitions = {

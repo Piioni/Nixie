@@ -10,8 +10,7 @@
   disko.devices = {
     disk.main = {
       type = "disk";
-      # Installation MUST override this nonexistent placeholder:
-      # disko-install --flake .#desktop --disk main <device>
+      # Replace with the target disk's /dev/disk/by-id path before installing (see README.md).
       device = "/dev/REPLACE_WITH_TARGET_DISK";
       content = {
         type = "gpt";

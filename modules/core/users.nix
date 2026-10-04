@@ -1,6 +1,7 @@
 {
   username,
   sshAuthorizedKeys,
+  initialHashedPassword,
   pkgs,
   ...
 }:
@@ -10,6 +11,7 @@
 
   users.users.${username} = {
     isNormalUser = true;
+    inherit initialHashedPassword;
     shell = pkgs.nushell;
     extraGroups = [
       "wheel"
