@@ -2,10 +2,14 @@
 {
   boot.initrd.systemd.enable = true;
 
+  # zram (priority 100) absorbs everyday swapping; this lower-priority swapfile
+  # holds the hibernation image. With systemd in the initrd on UEFI, resume finds
+  # the image through the HibernateLocation EFI variable, so no resume_offset is
+  # needed. Sized near RAM so hibernation does not fail under heavy workloads.
   swapDevices = [
     {
       device = "/swapfile";
-      size = 20480;
+      size = 32768;
     }
   ];
 
@@ -34,6 +38,7 @@
               type = "luks";
               name = "crypted";
               initrdUnlock = true;
+              settings.allowDiscards = true;
               content = {
                 type = "filesystem";
                 format = "ext4";

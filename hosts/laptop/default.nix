@@ -7,6 +7,7 @@
     ./boot.nix
     ./storage.nix
     ./power.nix
+    ./graphics.nix
     ./gaming.nix
   ];
 
@@ -18,4 +19,9 @@
   };
 
   modules.zram.enable = true;
+  modules.development = {
+    enable = true;
+    docker.enable = true;
+    android.enable = true;
+  };
 }

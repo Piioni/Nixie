@@ -7,6 +7,7 @@
     ./git.nix
     ./tui.nix
     ./nushell.nix
+    ./remote-work.nix
     ./starship.nix
     ./tuxedo.nix
     ./xdg.nix
