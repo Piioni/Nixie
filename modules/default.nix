@@ -2,6 +2,7 @@
 {
   imports = [
     ./core
+    ./development
     ./networking
     ./home-manager.nix
     ./stylix.nix

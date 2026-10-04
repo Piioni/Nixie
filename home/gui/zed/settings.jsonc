@@ -222,8 +222,9 @@
   "lsp": {
     "dart": {
       "binary": {
-        "path": "@DART@",
-        "arguments": ["language-server", "--protocol=lsp"],
+        // FVM resolves the SDK pinned by the opened project's .fvmrc.
+        "path": "fvm",
+        "arguments": ["dart", "language-server", "--protocol=lsp"],
       },
     },
     "tailwindcss-language-server": {

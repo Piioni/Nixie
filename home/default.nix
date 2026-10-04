@@ -8,6 +8,7 @@
   imports = [
     ./agents
     ./core
+    ./development
     ./gaming.nix
     ./gui
   ];
