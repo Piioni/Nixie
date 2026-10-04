@@ -11,3 +11,11 @@ alias zj = zellij
 alias cp = ^cp -iv
 alias mv = ^mv -iv
 alias rm = ^rm -vI
+
+# Development shortcuts.
+alias v = nvim
+alias g = git
+alias gs = git status
+alias ga = git add
+alias lg = lazygit
+alias lzd = lazydocker
