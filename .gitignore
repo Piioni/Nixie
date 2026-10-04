@@ -3,6 +3,7 @@ result
 result/
 .direnv/
 .DS_Store
+/.vscode/
 .pre-commit-config.yaml
 logs/
 core*
