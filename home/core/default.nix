@@ -6,8 +6,6 @@
     ./fastfetch.nix
     ./git.nix
     ./tui.nix
-    ./herdr.nix
-    ./moshi.nix
     ./nushell.nix
     ./starship.nix
     ./tuxedo.nix

@@ -7,6 +7,8 @@ in
     ./claude-code.nix
     ./pi-coding-agent.nix
     ./opencode.nix
+    ./herdr.nix
+    ./moshi.nix
   ];
 
   xdg.configFile = {
