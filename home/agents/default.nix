@@ -9,6 +9,7 @@ in
     ./opencode.nix
     ./herdr.nix
     ./moshi.nix
+    ./cli.nix
   ];
 
   xdg.configFile = {
