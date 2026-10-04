@@ -2,6 +2,13 @@
 {
   boot.initrd.systemd.enable = true;
 
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 20480;
+    }
+  ];
+
   disko.devices = {
     disk.main = {
       type = "disk";
@@ -28,15 +35,9 @@
               name = "crypted";
               initrdUnlock = true;
               content = {
-                type = "btrfs";
-                extraArgs = [ "-f" ];
-                subvolumes = {
-                  "@root".mountpoint = "/";
-                  "@swap" = {
-                    mountpoint = "/.swapvol";
-                    swap.swapfile.size = "20G";
-                  };
-                };
+                type = "filesystem";
+                format = "ext4";
+                mountpoint = "/";
               };
             };
           };

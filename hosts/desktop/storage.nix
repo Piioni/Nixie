@@ -1,5 +1,12 @@
 { ... }:
 {
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 20480;
+    }
+  ];
+
   disko.devices = {
     disk.main = {
       type = "disk";
@@ -22,15 +29,9 @@
           root = {
             size = "100%";
             content = {
-              type = "btrfs";
-              extraArgs = [ "-f" ];
-              subvolumes = {
-                "@root".mountpoint = "/";
-                "@swap" = {
-                  mountpoint = "/.swapvol";
-                  swap.swapfile.size = "20G";
-                };
-              };
+              type = "filesystem";
+              format = "ext4";
+              mountpoint = "/";
             };
           };
         };
