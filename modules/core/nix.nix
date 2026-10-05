@@ -1,4 +1,4 @@
-{ username, ... }:
+{ config, username, ... }:
 {
   nixpkgs.config.allowUnfree = true;
 
@@ -23,7 +23,7 @@
   # nh wraps nixos-rebuild with readable diffs and owns store garbage collection.
   programs.nh = {
     enable = true;
-    flake = "/home/${username}/nix-config";
+    flake = config.home-manager.users.${username}.nixie.home.repositoryRoot;
     clean = {
       enable = true;
       dates = "weekly";
