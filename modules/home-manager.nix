@@ -17,6 +17,8 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
+    # Move pre-existing dotfiles aside instead of aborting activation.
+    backupFileExtension = "hm-backup";
     extraSpecialArgs = {
       inherit
         helium
