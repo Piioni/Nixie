@@ -19,6 +19,7 @@
       ".fvm"
     ];
     settings = {
+      # Personal identity by default; the include below switches to the work identity.
       user = {
         name = "Piioni";
         email = "rangelc.juane@gmail.com";

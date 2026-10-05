@@ -108,7 +108,7 @@
         "$" = "goto_line_end";
         "0" = "goto_line_start";
 
-        # Ctrl+o opens Zellij Session.
+        # Zellij owns Ctrl+o (session mode), so jump_backward moves to Ctrl+Shift+o.
         "C-S-o" = "jump_backward";
       };
     };
