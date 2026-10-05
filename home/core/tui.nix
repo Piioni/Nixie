@@ -28,7 +28,7 @@
       enableNushellIntegration = true;
       enableZshIntegration = false;
     };
-    
+
     lazygit.enable = true;
   };
 }
