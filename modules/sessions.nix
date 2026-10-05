@@ -11,7 +11,8 @@
         wayland.enable = true;
       };
     };
-    greetd.enable = false;
+    # Trash, network shares and MTP phones in Nautilus.
+    gvfs.enable = true;
     xserver.xkb.layout = "us";
   };
 }
