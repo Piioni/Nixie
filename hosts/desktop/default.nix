@@ -14,4 +14,8 @@
   hardware.bluetooth.enable = true;
 
   modules.zram.enable = false;
+  modules.development = {
+    enable = true;
+    docker.enable = true;
+  };
 }
