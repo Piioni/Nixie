@@ -1,16 +1,7 @@
 { ... }:
 {
-  services.tuned = {
-    enable = true;
-    ppdSupport = true;
-    ppdSettings.main.default = "balanced";
-    settings.dynamic_tuning = true;
-  };
-
-  services.upower.enable = true;
+  services.tuned.ppdSettings.main.default = "balanced";
   services.thermald.enable = true;
-  services.power-profiles-daemon.enable = false;
-  services.tlp.enable = false;
 
   # Closing the lid suspends; after an hour asleep the laptop hibernates to the
   # encrypted swapfile so the battery cannot drain. `remote-work-on` blocks this.
