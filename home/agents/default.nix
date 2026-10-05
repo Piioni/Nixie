@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   skillsPath = "${config.nixie.home.repositoryRoot}/home/agents/skills";
 in
@@ -12,24 +12,13 @@ in
     ./cli.nix
   ];
 
-  xdg.configFile = {
-    "agents/skill/guided-learning/SKILL.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${skillsPath}/guided-learning/SKILL.md";
-    "agents/skills/domain-modeling/ADR-FORMAT.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${skillsPath}/domain-modeling/ADR-FORMAT.md";
-    "agents/skills/domain-modeling/CONTEXT-FORMAT.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${skillsPath}/domain-modeling/CONTEXT-FORMAT.md";
-    "agents/skills/domain-modeling/SKILL.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${skillsPath}/domain-modeling/SKILL.md";
-    "agents/skills/grilling/SKILL.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${skillsPath}/grilling/SKILL.md";
-    "agents/skills/grill-me/SKILL.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${skillsPath}/grill-me/SKILL.md";
-    "agents/skills/grill-with-docs/SKILL.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${skillsPath}/grill-with-docs/SKILL.md";
-    "agents/skills/show-me/SKILL.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${skillsPath}/show-me/SKILL.md";
-  };
+  # One live link per skill directory, so new files in a skill need no Nix change.
+  xdg.configFile = lib.mapAttrs' (
+    name: _:
+    lib.nameValuePair "agents/skills/${name}" {
+      source = config.lib.file.mkOutOfStoreSymlink "${skillsPath}/${name}";
+    }
+  ) (lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./skills));
 
   home.file = {
     ".agents/skills".source = config.lib.file.mkOutOfStoreSymlink skillsPath;

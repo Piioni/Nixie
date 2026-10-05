@@ -6,6 +6,7 @@ in
 {
   home.packages = [ moshiHook ];
 
+  # Claude Code and Pi hooks call this stable path, which survives package updates.
   home.file.".local/bin/moshi-hook".source = "${moshiHook}/bin/moshi-hook";
 
   xdg.configFile."moshi/config.toml".source = tomlFormat.generate "moshi-config.toml" {

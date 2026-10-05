@@ -5,7 +5,7 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 for package in \
   claude-project-adapter \
-  figma-context \
+  piioni-shell \
   moshi-permission-bridge \
   ui-overhaul
  do
