@@ -10,13 +10,6 @@ let
       ];
 in
 {
-  home.sessionVariables = {
-    EDITOR = "nvim";
-    VISUAL = "nvim";
-    TERMINAL = "ghostty";
-    BROWSER = "helium";
-  };
-
   programs.nushell = {
     enable = true;
     configFile.source = ./nushell/config.nu;

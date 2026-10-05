@@ -3,6 +3,7 @@
   imports = [
     ./editors
     ./btop.nix
+    ./environment.nix
     ./fastfetch.nix
     ./git.nix
     ./tui.nix
