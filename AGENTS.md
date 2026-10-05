@@ -8,8 +8,15 @@ This beginner-friendly flake defines two NixOS hosts: `desktop` and `laptop`.
 - `hosts/desktop/` and `hosts/laptop/` compose each machine's host, Home Manager, hardware, and
   small host-specific modules.
 - `modules/` contains shared system configuration, including Home Manager integration.
-- Shared Home Manager modules live in `home/`, and each host's Home Manager-specific values live in
-  `hosts/<host>/home.nix`.
+  `modules/core/` holds what every host needs (boot loader, Nix/nh, tuned, users, maintenance);
+  `modules/development/` holds opt-in developer support behind `modules.development.enable`,
+  `.docker.enable` and `.android.enable` (nix-ld, Docker, Android Studio/JDK).
+- Shared Home Manager modules live in `home/`: `home/core/` (shell, Git, terminal tools),
+  `home/development/` (runtimes, CLIs, FVM, direnv), `home/agents/` and `home/gui/`. Each host's
+  Home Manager-specific values live in `hosts/<host>/home.nix`.
+- Nushell is the login shell. Shell-agnostic variables live in `home/core/environment.nix`; PATH
+  entries belong in `home.sessionPath`, which the Nushell environment consumes.
+- Local packages that nixpkgs lacks live in `packages/` and are added with `pkgs.callPackage`.
 - `modules/sessions.nix` enables SDDM and the Niri session on both hosts; `modules/xdg.nix`
   provides shared system XDG portal integration; and `hosts/desktop/nvidia.nix` contains
   desktop-specific NVIDIA configuration.
@@ -26,9 +33,13 @@ system build is intentionally unavailable until the relevant hardware configurat
 
 Home Manager deploys two kinds of file here, and the difference decides how you iterate:
 
-- **Live (out of store).** `nixie.home.repositoryRoot` points at this checkout and the agent skills
-  under `home/agents/skills` resolve into the repository. Each host declares that root explicitly
-  in `hosts/<host>/home.nix`.
+- **Live (out of store).** `nixie.home.repositoryRoot` points at this checkout
+  (`/home/piioni/nix-config` on the machines). The agent skills, `home/agents/claude-code-config`
+  and `home/agents/pi-agent-config` resolve into the repository, so edits there apply without a
+  rebuild. Each host declares that root explicitly in `hosts/<host>/home.nix`.
+- **Seeded once.** `~/.claude/settings.json` is copied from
+  `home/agents/claude-code-config/settings.json` only when missing, because Claude Code and its
+  integrations rewrite it.
 - **Store backed.** Nushell, Kitty, Zed, Zellij, Swappy, Swayimg, Niri and Noctalia settings, plus
   every generated file, are copied into the Nix store. Changing them requires rebuilding and
   activating the host's Home Manager configuration.
@@ -65,8 +76,8 @@ The pinned NixOS SDDM module's default Wayland compositor (Weston) generates its
 system XKB layout, but local evaluation cannot prove the effective layout in a running login greeter.
 
 `hm-build` builds only the selected host's Home Manager activation package and uses `--no-link`; it
-does not activate a profile. Its `NIXPKGS_ALLOW_UNFREE=1` and `--impure` settings are scoped to that
-recipe because the current Home Manager configuration needs unfree agent packages.
+does not activate a profile. Unfree packages are allowed through `nixpkgs.config.allowUnfree` in
+`modules/core/nix.nix`, so no impure flags are needed.
 
 Use explicit Nix file paths for formatting checks. These recipes reject `references/`, paths
 outside the repository, and symlinks:
@@ -94,7 +105,7 @@ just update-one nixpkgs
 just update-all
 ```
 
-`update-one` accepts only `nixpkgs`, `nix-gaming`, `disko`, `home-manager`, `noctalia`, or
+`update-one` accepts only `nixpkgs`, `nix-gaming`, `disko`, `stylix`, `home-manager`, `noctalia`, or
 `noctalia-protonvpn`; `update-all` runs `nix flake update`. Neither builds,
 switches, or commits. After either, inspect `git diff flake.lock`, then use `just show-working` and
 `just hm-build desktop` or `just hm-build laptop` for each affected host. `nix-gaming` follows the
@@ -103,7 +114,9 @@ commit-pinned URLs in `flake.nix`, so a lockfile refresh alone cannot advance th
 
 `just system-build desktop` or `just system-build laptop` is also non-activating, but it first
 requires that host's generated `hardware-configuration.nix`; it prints a practical failure before
-calling Nix when the file is missing.
+calling Nix when the file is missing. Installation steps, including generating that file, are in
+`README.md`. The laptop disk is pinned by ID in `hosts/laptop/storage.nix`; the desktop disk is
+still a placeholder that must be set before installing.
 
 ## Validation Order
 
@@ -135,12 +148,18 @@ runtime behavior:
 - [ ] In LocalSend Settings → Receive, turn off both Quick Save toggles, including Quick Save from
       Favorites; confirm incoming transfers require approval, including from a favorite sender.
 - [ ] Confirm screen sharing and portal-dependent features work in the Niri session.
-- [ ] Confirm the running firewall backend and rules match evaluated policy; private source ranges
-      do not establish trusted sender identity.
+- [ ] Confirm the running firewall backend and rules match evaluated policy; only the ports the
+      modules open (for example SSH over Tailscale) should be reachable.
+- [ ] Laptop: closing the lid suspends, then hibernates after an hour and resumes after the LUKS
+      prompt; `remote-work-on` keeps it awake with the lid closed and `remote-work-off` restores it.
+- [ ] Docker runs without sudo, and `fvm`, Android Studio and `adb` work for a Sipos project.
+- [ ] X11-only apps (Steam, Android Studio) open through xwayland-satellite in Niri.
 
 ## Deployment Boundary
 
-This repository provides no activation recipe. `nixos-rebuild build` only builds a closure;
+This repository provides no activation recipe. `nh os switch` (configured with the checkout as its
+flake) is the friendlier wrapper with a package diff; `nh` also owns weekly store cleanup.
+`nixos-rebuild build` only builds a closure;
 `nixos-rebuild test` temporarily activates a configuration until reboot; `nixos-rebuild boot` sets
 the next boot configuration without switching the running system; and `nixos-rebuild switch`
 builds and activates it now. These operations normally require root privileges and can affect the

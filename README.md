@@ -111,17 +111,22 @@ reboot
    ```
 3. One-time tool setup:
    - `rustup default stable`
+   - `herdr integration install claude` (and the Moshi/gentle-ai installers) so the hooks in
+     `~/.claude/settings.json` find their scripts.
    - Laptop: open Android Studio once so it downloads the SDK into `~/Android/Sdk`.
    - `fvm install` inside each Flutter project.
 4. Work through the runtime checklist in `AGENTS.md` → *Operational checklist*.
 
 ## Day-to-day
 
-Apply changes from the checkout:
+Apply changes from the checkout (`nh` already knows the flake path and shows a package diff):
 
 ```bash
-sudo nixos-rebuild switch --flake ~/nix-config#<host>
+nh os switch            # or: sudo nixos-rebuild switch --flake ~/nix-config#<host>
 ```
+
+Projects with a `flake.nix` dev shell can add `use flake` to an `.envrc`, then run `direnv allow`
+once; the environment loads on `cd`.
 
 | Goal | Command |
 |------|---------|
