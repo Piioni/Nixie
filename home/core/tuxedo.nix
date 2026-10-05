@@ -1,9 +1,10 @@
 { pkgs, ... }:
 {
-  home.packages = [ pkgs.tuxedo-rs ];
+  # webstonehq/tuxedo, a todo.txt TUI; nixpkgs' tuxedo-rs is unrelated TUXEDO hardware tooling.
+  home.packages = [ (pkgs.callPackage ../../packages/tuxedo.nix { }) ];
 
   xdg.configFile."tuxedo/config.toml".text = ''
-    # tuxedo config
+    # tuxedo's own key = value format, not TOML.
     theme = Muted Slate
     density = compact
     sort = priority
