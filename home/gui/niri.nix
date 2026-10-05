@@ -170,7 +170,6 @@
         # Window rules; _children retains repeated matches and rule ordering.
         {
           window-rule._children = [
-            { match._props.app-id = "(code|visual-studio-code|com\\.visualstudio\\.code)$"; }
             { match._props.app-id = "(zed|Zed|dev\\.zed\\.Zed)$"; }
             { open-on-workspace = "coding"; }
             { open-maximized = true; }
@@ -178,31 +177,25 @@
         }
         {
           window-rule._children = [
-            { match._props.app-id = "(helium|Helium|firefox)$"; }
+            { match._props.app-id = "(helium|Helium|google-chrome)$"; }
             { open-on-workspace = "browser"; }
             { open-maximized = true; }
           ];
         }
         {
           window-rule._children = [
-            { match._props.app-id = "(spotify|com\\.spotify\\.Client)$"; }
+            { match._props.app-id = "(tidal-hifi)$"; }
             { open-on-workspace = "music"; }
             { open-maximized = true; }
           ];
         }
         {
           window-rule._children = [
-            { match._props.app-id = "(vesktop|dev\\.vesktop\\.Vesktop|slack|com\\.slack\\.Slack)$"; }
+            {
+              match._props.app-id = "(vesktop|dev\\.vesktop\\.Vesktop|signal|signal-desktop|teams-for-linux)$";
+            }
             { open-on-workspace = "social"; }
             { open-maximized = true; }
-          ];
-        }
-        {
-          window-rule._children = [
-            { match._props.app-id = "(bitwarden|com\\.bitwarden\\.desktop)$"; }
-            { open-floating = true; }
-            { default-column-width.fixed = 900; }
-            { default-window-height.fixed = 650; }
           ];
         }
         {
@@ -213,12 +206,8 @@
         }
         {
           window-rule._children = [
-            {
-              match._props = {
-                app-id = "firefox$";
-                title = "^Picture-in-Picture$";
-              };
-            }
+            # Chromium-based browsers title their video pop-out "Picture in picture".
+            { match._props.title = "^Picture[- ]in[- ][Pp]icture$"; }
             { open-floating = true; }
           ];
         }
