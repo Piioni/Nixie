@@ -35,7 +35,7 @@ hm-build host:
       *) echo "Supported hosts: desktop, laptop" >&2; exit 2 ;;
     esac
     username=$(nix eval --impure --no-write-lock-file --raw --expr '(import ./vars).username')
-    NIXPKGS_ALLOW_UNFREE=1 nix build --impure --no-write-lock-file "path:.#nixosConfigurations.$host.config.home-manager.users.$username.home.activationPackage" --no-link
+    nix build --no-write-lock-file "path:.#nixosConfigurations.$host.config.home-manager.users.$username.home.activationPackage" --no-link
 
 # Build a system closure only after its generated hardware file exists.
 system-build host:
@@ -123,8 +123,8 @@ update-one input:
     set -euo pipefail
     input={{ quote(input) }}
     case "$input" in
-      nixpkgs|nix-gaming|disko|home-manager|noctalia|noctalia-protonvpn) ;;
-      *) echo "Floating inputs: nixpkgs, nix-gaming, disko, home-manager, noctalia, noctalia-protonvpn" >&2; exit 2 ;;
+      nixpkgs|nix-gaming|disko|stylix|home-manager|noctalia|noctalia-protonvpn) ;;
+      *) echo "Floating inputs: nixpkgs, nix-gaming, disko, stylix, home-manager, noctalia, noctalia-protonvpn" >&2; exit 2 ;;
     esac
     nix flake update "$input"
 
