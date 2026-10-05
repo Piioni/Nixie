@@ -21,7 +21,8 @@
     checkConfig = true;
     systemd.enable = false;
     portalPackage = null;
-    xwaylandSatellitePackage = null;
+    # Runs X11-only apps (Steam, Android Studio, some Electron builds) on demand.
+    xwaylandSatellitePackage = pkgs.xwayland-satellite;
 
     settings = {
       _children = [

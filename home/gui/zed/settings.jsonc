@@ -179,9 +179,7 @@
     },
     "copy_on_select": true,
     "cursor_shape": "block",
-    "shell": {
-      "program": "/usr/bin/bash",
-    },
+    "shell": "system",
     "dock": "bottom",
     "blinking": "on",
     "show_count_badge": true,
