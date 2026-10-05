@@ -16,6 +16,7 @@ in
   # must stay writable: seed it once from the tracked template, never overwrite it.
   home.activation.seedClaudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -e "$HOME/.claude/settings.json" ]; then
+      run rm -f "$HOME/.claude/settings.json"
       run install -Dm644 ${./claude-code-config/settings.json} "$HOME/.claude/settings.json"
     fi
   '';
