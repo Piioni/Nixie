@@ -1,15 +1,5 @@
 # Shell functions.
-def --env yy [...args] {
-    let tmp = (mktemp -t "yazi-cwd.XXXXX")
-    ^yazi ...$args --cwd-file $tmp
-    let cwd = (open $tmp)
-
-    if $cwd != "" and $cwd != $env.PWD {
-        cd $cwd
-    }
-
-    ^rm -fp $tmp
-}
+# `yy` (yazi cd-on-exit) comes from the Home Manager yazi integration.
 
 def reload [] {
     exec nu

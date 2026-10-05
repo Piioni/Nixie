@@ -17,5 +17,4 @@ alias v = nvim
 alias g = git
 alias gs = git status
 alias ga = git add
-alias lg = lazygit
 alias lzd = lazydocker
