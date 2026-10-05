@@ -19,6 +19,7 @@
     useUserPackages = true;
     # Move pre-existing dotfiles aside instead of aborting activation.
     backupFileExtension = "hm-backup";
+    overwriteBackup = true;
     extraSpecialArgs = {
       inherit
         helium
